@@ -1,0 +1,896 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(18px);
+  background: rgba(245, 248, 255, 0.86);
+  border-bottom: 1px solid rgba(191, 219, 254, 0.85);
+}
+
+.site-header__inner,
+.page-container,
+.site-footer__inner {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.site-header__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.site-header__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.875rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-strong);
+  padding: 0;
+  text-align: left;
+}
+
+.brand-button span {
+  display: grid;
+}
+
+.brand-button small {
+  color: var(--color-text-soft);
+  font-size: 0.82rem;
+}
+
+.brand-mark {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1d4ed8, #60a5fa);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.main-nav {
+  display: none;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.main-nav-open {
+  display: flex;
+}
+
+.nav-link {
+  border: 1px solid rgba(191, 219, 254, 0.95);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--color-text-base);
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+}
+
+.nav-link-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.mobile-menu-button {
+  width: 3rem;
+  height: 3rem;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(191, 219, 254, 0.95);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.mobile-menu-button span {
+  width: 1.1rem;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--color-text-strong);
+}
+
+.page-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem 0 4rem;
+}
+
+.hero-section,
+.section-block {
+  position: relative;
+}
+
+.hero-card,
+.info-card,
+.filter-panel,
+.licitacion-card,
+.detail-panel,
+.empty-state,
+.cta-panel {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(191, 219, 254, 0.88);
+  box-shadow: 0 20px 45px rgba(37, 99, 235, 0.08);
+}
+
+.hero-card {
+  padding: 2rem;
+  border-radius: 2rem;
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.18), transparent 36%),
+    rgba(255, 255, 255, 0.9);
+}
+
+.eyebrow,
+.section-kicker,
+.detail-code,
+.licitacion-card__code {
+  margin: 0 0 0.8rem;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.hero-card h1,
+.section-heading h1,
+.section-heading h2,
+.detail-header h1,
+.detail-header h2 {
+  margin: 0;
+  color: var(--color-text-strong);
+  line-height: 1.08;
+}
+
+.hero-card h1 {
+  font-size: clamp(2.2rem, 7vw, 4.6rem);
+  max-width: 13ch;
+}
+
+.hero-copy,
+.section-heading p,
+.detail-header p,
+.info-card p,
+.empty-state p,
+.site-footer p,
+.results-summary {
+  color: var(--color-text-soft);
+}
+
+.hero-copy {
+  max-width: 60ch;
+  margin: 1.25rem 0 0;
+  font-size: 1.05rem;
+}
+
+.hero-actions,
+.filter-actions,
+.cta-list,
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+.hero-actions {
+  margin-top: 1.75rem;
+}
+
+.button {
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  padding: 0.9rem 1.15rem;
+  font-weight: 700;
+  transition: 160ms ease;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.button-primary {
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  color: #fff;
+}
+
+.button-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.button-secondary {
+  background: rgba(239, 246, 255, 0.88);
+  border-color: rgba(147, 197, 253, 0.95);
+  color: var(--color-text-strong);
+}
+
+.section-block {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.section-block-tight {
+  gap: 1rem;
+}
+
+.section-heading {
+  max-width: 48rem;
+}
+
+.section-heading-left {
+  text-align: left;
+}
+
+.feature-grid,
+.results-grid,
+.detail-grid,
+.site-footer__inner {
+  display: grid;
+  gap: 1rem;
+}
+
+.feature-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.info-card,
+.licitacion-card,
+.detail-panel,
+.empty-state,
+.cta-panel,
+.filter-panel {
+  border-radius: 1.6rem;
+  padding: 1.35rem;
+}
+
+.filter-panel {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.info-card h3,
+.licitacion-card h3 {
+  margin: 0 0 0.5rem;
+  color: var(--color-text-strong);
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
+  background: rgba(219, 234, 254, 0.95);
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.section-highlight {
+  margin-top: 0.5rem;
+}
+
+.cta-panel {
+  display: grid;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.filter-grid,
+.licitacion-meta-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.field-group,
+.field-group-full {
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
+}
+
+.field-group label {
+  color: var(--color-text-strong);
+  font-weight: 700;
+  line-height: 1.2;
+  min-height: 1.5rem;
+}
+
+.field-group input,
+.field-group select {
+  width: 100%;
+  border: 1px solid rgba(147, 197, 253, 0.95);
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 1.1rem;
+  min-height: 4rem;
+  padding: 0.85rem 1rem;
+  color: var(--color-text-strong);
+  line-height: 1.2;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.field-group select {
+  padding-right: 3rem;
+}
+
+.date-picker {
+  position: relative;
+}
+
+.date-picker__trigger {
+  width: 100%;
+  min-height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(147, 197, 253, 0.95);
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--color-text-strong);
+  font-weight: 500;
+  text-align: left;
+}
+
+.date-picker__trigger-placeholder {
+  color: var(--color-text-soft);
+}
+
+.date-picker__icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex: 0 0 auto;
+  color: var(--color-text-soft);
+}
+
+.date-picker__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: currentColor;
+}
+
+.date-picker__popover {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  left: 0;
+  z-index: 20;
+  padding: 1.1rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 20px 45px rgba(37, 99, 235, 0.14);
+}
+
+.date-picker__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.date-picker__header-main {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.date-picker__month-label {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text-strong);
+  text-transform: capitalize;
+}
+
+.date-picker__year-selector {
+  position: relative;
+}
+
+.date-picker__year-trigger {
+  min-height: 2.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid rgba(191, 219, 254, 0.95);
+  border-radius: 999px;
+  background: #f8fbff;
+  color: var(--color-text-strong);
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.06);
+}
+
+.date-picker__year-trigger svg,
+.date-picker__nav-button svg {
+  width: 1rem;
+  height: 1rem;
+  display: block;
+  fill: currentColor;
+}
+
+.date-picker__year-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  gap: 0.55rem;
+  padding-top: 0.15rem;
+}
+
+.date-picker__body {
+  position: relative;
+  min-height: 17.75rem;
+}
+
+.date-picker__panel {
+  position: relative;
+}
+
+.date-picker__panel-enter {
+  animation: date-picker-fade-in 180ms ease;
+}
+
+.date-picker__year-option {
+  width: 100%;
+  min-height: 2.7rem;
+  padding: 0.5rem 0.65rem;
+  border: 0;
+  border-radius: 0.8rem;
+  background: #f8fbff;
+  color: var(--color-text-strong);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  border: 1px solid rgba(191, 219, 254, 0.8);
+}
+
+.date-picker__year-option:hover {
+  background: #eef4ff;
+}
+
+.date-picker__year-option-selected {
+  background: #2563eb;
+  color: #fff;
+}
+
+.date-picker__year-option-current {
+  border-color: rgba(37, 99, 235, 0.4);
+  background: rgba(239, 246, 255, 0.95);
+  color: #2563eb;
+}
+
+.date-picker__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.15rem;
+}
+
+.date-picker__nav-button {
+  width: 2.6rem;
+  height: 2.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(191, 219, 254, 0.95);
+  border-radius: 999px;
+  background: #f8fbff;
+  color: var(--color-text-strong);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.08);
+}
+
+.date-picker__nav-button:hover:not(:disabled),
+.date-picker__year-trigger:hover {
+  background: #eef4ff;
+}
+
+.date-picker__nav-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.date-picker__calendar {
+  margin: 0;
+}
+
+.date-picker__calendar .rdp-root {
+  margin: 0;
+  color: var(--color-text-strong);
+}
+
+.date-picker__calendar .rdp-months,
+.date-picker__calendar .rdp-month {
+  margin: 0;
+}
+
+.date-picker__calendar .rdp-month {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.date-picker__calendar .rdp-month_caption,
+.date-picker__calendar .rdp-nav {
+  display: none;
+}
+
+.date-picker__calendar .rdp-month_grid {
+  border-collapse: separate;
+  border-spacing: 0.35rem 0.45rem;
+}
+
+.date-picker__calendar .rdp-weekdays th {
+  padding: 0 0 0.1rem;
+}
+
+.date-picker__calendar .rdp-weekday {
+  color: var(--color-text-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.date-picker__calendar .rdp-day {
+  width: 2.65rem;
+  height: 2.65rem;
+}
+
+.date-picker__calendar .rdp-day_button {
+  width: 2.65rem;
+  height: 2.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 0.95rem;
+  background: transparent;
+  color: var(--color-text-strong);
+  font-weight: 700;
+}
+
+.date-picker__calendar .rdp-day_button:hover {
+  background: #eef4ff;
+}
+
+.date-picker__calendar .rdp-selected {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.date-picker__calendar .rdp-selected .rdp-day_button {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #fff;
+  box-shadow: 0 10px 18px rgba(37, 99, 235, 0.2);
+}
+
+.date-picker__calendar .rdp-today:not(.rdp-selected) .rdp-day_button {
+  border-color: rgba(37, 99, 235, 0.22);
+  background: rgba(239, 246, 255, 0.9);
+  color: #2563eb;
+}
+
+.date-picker__calendar .rdp-outside .rdp-day_button {
+  color: rgba(93, 107, 137, 0.45);
+}
+
+.date-picker__calendar .rdp-day_button:focus-visible,
+.date-picker__nav-button:focus-visible,
+.date-picker__year-trigger:focus-visible,
+.date-picker__year-option:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.24);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .date-picker__year-panel {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@keyframes date-picker-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.field-error {
+  margin: 0;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.field-help {
+  margin: 0;
+  color: var(--color-text-soft);
+}
+
+.filter-actions {
+  margin-top: 0.35rem;
+}
+
+.results-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.results-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.licitacion-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.licitacion-card__top,
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.licitacion-meta-grid {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.licitacion-meta-grid dt,
+.detail-row dt {
+  color: var(--color-text-soft);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.licitacion-meta-grid dd,
+.detail-row dd {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-weight: 600;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-badge-publicada {
+  background: rgba(219, 234, 254, 1);
+  color: #1d4ed8;
+}
+
+.status-badge-cerrada {
+  background: rgba(226, 232, 240, 1);
+  color: #334155;
+}
+
+.status-badge-adjudicada {
+  background: rgba(220, 252, 231, 1);
+  color: #15803d;
+}
+
+.status-badge-desierta,
+.status-badge-desconocido {
+  background: rgba(254, 226, 226, 1);
+  color: #b91c1c;
+}
+
+.detail-panel {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.detail-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.detail-row {
+  padding: 1rem;
+  border-radius: 1.1rem;
+  background: rgba(248, 250, 252, 0.96);
+  border: 1px solid rgba(226, 232, 240, 1);
+}
+
+.empty-state {
+  text-align: center;
+  display: grid;
+  gap: 0.9rem;
+  justify-items: center;
+}
+
+.empty-state h2 {
+  margin: 0;
+  color: var(--color-text-strong);
+}
+
+.pagination {
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination__status {
+  font-weight: 700;
+  color: var(--color-text-strong);
+}
+
+.site-footer {
+  margin-top: 1.5rem;
+  padding: 2.5rem 0 2.5rem;
+  border-top: 1px solid rgba(191, 219, 254, 0.88);
+}
+
+.site-footer__inner {
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 2rem;
+  padding: 0 0 2.25rem;
+  align-items: start;
+}
+
+.site-footer__column {
+  max-width: 18rem;
+}
+
+.site-footer__column-brand {
+  max-width: 32rem;
+}
+
+.site-footer h2 {
+  margin: 0 0 0.65rem;
+  color: var(--color-text-strong);
+  font-size: clamp(1.1rem, 2vw, 1.55rem);
+  font-weight: 800;
+}
+
+.site-footer p,
+.footer-contact li,
+.footer-links a {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.footer-links,
+.footer-contact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.8rem;
+  color: var(--color-text-soft);
+}
+
+.footer-links a {
+  color: var(--color-text-strong);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.site-footer__bottom {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding-top: 2rem;
+  text-align: center;
+  border-top: 1px solid rgba(191, 219, 254, 0.88);
+  color: var(--color-text-soft);
+}
+
+.site-footer__bottom p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+@media (min-width: 768px) {
+  .site-header__inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .main-nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    padding-top: 0;
+  }
+
+  .site-header__row {
+    flex: 0 0 auto;
+  }
+
+  .mobile-menu-button {
+    display: none;
+  }
+
+  .hero-card,
+  .info-card,
+  .filter-panel,
+  .licitacion-card,
+  .detail-panel,
+  .empty-state,
+  .cta-panel {
+    padding: 1.6rem;
+  }
+
+  .filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cta-panel {
+    grid-template-columns: 1.6fr 1fr;
+  }
+
+  .site-footer {
+    padding-top: 3.2rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .site-footer__inner {
+    grid-template-columns: 1fr;
+    gap: 1.8rem;
+  }
+
+  .site-footer__column,
+  .site-footer__column-brand {
+    max-width: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    padding-top: 2.5rem;
+  }
+
+  .hero-card {
+    padding: 3rem;
+  }
+}
