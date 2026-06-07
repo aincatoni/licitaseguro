@@ -2,12 +2,12 @@ import EmptyState from "../common/EmptyState";
 import Pagination from "../common/Pagination";
 import LicitacionCard from "./LicitacionCard";
 
-function LicitacionList({ items, onViewDetail, pagination }) {
+function LicitacionList({ items, onViewDetail, pagination, emptyMessage }) {
   if (!items.length) {
     return (
       <EmptyState
         title="No se encontraron licitaciones"
-        message="Prueba otro estado o una fecha distinta para obtener resultados en esta vista mock."
+        message={emptyMessage || "Prueba otro estado o una fecha distinta para obtener resultados."}
       />
     );
   }

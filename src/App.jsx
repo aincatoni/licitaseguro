@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./App.css";
 import EmptyState from "./components/common/EmptyState";
+import LoadingState from "./components/common/LoadingState";
+import NoticeBanner from "./components/common/NoticeBanner";
 import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
 import PageContainer from "./components/layout/PageContainer";
@@ -12,6 +14,14 @@ import ProveedorSearchForm from "./components/proveedores/ProveedorSearchForm";
 import { licitacionesMock, proveedoresMock } from "./data/mockData";
 import usePagination from "./hooks/usePagination";
 import { normalizeRutForQuery } from "./utils/rut";
+import {
+  createMockNotice,
+  fetchLicitacionDetail,
+  fetchLicitaciones,
+  fetchProveedorByRut,
+  getMercadoPublicoErrorMessage,
+  isMercadoPublicoConfigured,
+} from "./services/mercadoPublicoApi";
 
 const INITIAL_FILTERS = {
   fecha: "",
@@ -110,7 +120,17 @@ function HomeView({ onNavigate }) {
   );
 }
 
-function LicitacionesView({ filters, onSearch, onClear, items, onViewDetail, pagination }) {
+function LicitacionesView({
+  filters,
+  onSearch,
+  onClear,
+  items,
+  onViewDetail,
+  pagination,
+  isLoading,
+  error,
+  notice,
+}) {
   return (
     <>
       <section className="section-block section-block-tight">
@@ -122,17 +142,31 @@ function LicitacionesView({ filters, onSearch, onClear, items, onViewDetail, pag
           </p>
         </div>
 
-        <LicitacionFilters initialValues={filters} onSearch={onSearch} onClear={onClear} />
+        <LicitacionFilters initialValues={filters} onSearch={onSearch} onClear={onClear} isLoading={isLoading} />
       </section>
 
       <section className="section-block section-block-tight">
-        <LicitacionList items={items} onViewDetail={onViewDetail} pagination={pagination} />
+        <NoticeBanner tone="info" message={notice} />
+        <NoticeBanner tone="error" message={error} />
+        {isLoading ? (
+          <LoadingState
+            title="Cargando licitaciones..."
+            message="Consultando Mercado Publico y preparando los resultados del listado."
+          />
+        ) : (
+          <LicitacionList
+            items={items}
+            onViewDetail={onViewDetail}
+            pagination={pagination}
+            emptyMessage="Prueba otro estado o una fecha distinta para obtener resultados."
+          />
+        )}
       </section>
     </>
   );
 }
 
-function ProveedorView({ result, onSearch }) {
+function ProveedorView({ result, onSearch, isLoading, error, notice }) {
   return (
     <>
       <section className="section-block section-block-tight">
@@ -145,18 +179,29 @@ function ProveedorView({ result, onSearch }) {
           </p>
         </div>
 
-        <ProveedorSearchForm onSearch={onSearch} />
+        <ProveedorSearchForm onSearch={onSearch} isLoading={isLoading} />
       </section>
 
       <section className="section-block section-block-tight">
-        {result ? (
+        <NoticeBanner tone="info" message={notice} />
+        <NoticeBanner tone="error" message={error} />
+        {isLoading ? (
+          <LoadingState
+            title="Buscando proveedor..."
+            message="Validando el RUT y consultando la informacion disponible en Mercado Publico."
+          />
+        ) : null}
+
+        {!isLoading && result ? (
           <ProveedorResultCard proveedor={result} />
-        ) : (
+        ) : null}
+
+        {!isLoading && !result ? (
           <EmptyState
             title="Aun no hay proveedor seleccionado"
-            message="Ingresa un RUT valido para revisar si existe una coincidencia en los datos mock de trabajo."
+            message="Ingresa un RUT valido para revisar si existe una coincidencia en Mercado Publico o en la base mock local."
           />
-        )}
+        ) : null}
       </section>
     </>
   );
@@ -164,10 +209,19 @@ function ProveedorView({ result, onSearch }) {
 
 function App() {
   const [currentView, setCurrentView] = useState("home");
-  const [selectedLicitacionCode, setSelectedLicitacionCode] = useState(null);
   const [appliedFilters, setAppliedFilters] = useState(INITIAL_FILTERS);
   const [licitaciones, setLicitaciones] = useState(licitacionesMock);
+  const [selectedLicitacion, setSelectedLicitacion] = useState(null);
+  const [licitacionesError, setLicitacionesError] = useState("");
+  const [licitacionesNotice, setLicitacionesNotice] = useState(createMockNotice("El modulo de licitaciones"));
+  const [detailError, setDetailError] = useState("");
+  const [detailNotice, setDetailNotice] = useState("");
+  const [isLicitacionesLoading, setIsLicitacionesLoading] = useState(false);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [proveedorResult, setProveedorResult] = useState(null);
+  const [proveedorError, setProveedorError] = useState("");
+  const [proveedorNotice, setProveedorNotice] = useState(createMockNotice("El modulo de proveedores"));
+  const [isProveedorLoading, setIsProveedorLoading] = useState(false);
 
   const pagination = usePagination(licitaciones, 10);
 
@@ -175,37 +229,109 @@ function App() {
     setCurrentView(view);
   };
 
-  const handleLicitacionesSearch = ({ fecha, estado }) => {
-    const filteredItems = licitacionesMock.filter((item) => {
-      const matchesFecha = !fecha || item.fechaCierre === fecha;
-      const matchesEstado = !estado || item.estado === estado;
-      return matchesFecha && matchesEstado;
-    });
-
+  const handleLicitacionesSearch = async ({ fecha, estado }) => {
     setAppliedFilters({ fecha, estado });
-    setLicitaciones(filteredItems);
     setCurrentView("licitaciones");
+    setLicitacionesError("");
+    setDetailError("");
+    setSelectedLicitacion(null);
+    pagination.goToPage(1);
+
+    if (!isMercadoPublicoConfigured()) {
+      const filteredItems = licitacionesMock.filter((item) => {
+        const matchesFecha = !fecha || item.fechaCierre === fecha;
+        const matchesEstado = !estado || item.estado === estado;
+        return matchesFecha && matchesEstado;
+      });
+
+      setLicitaciones(filteredItems);
+      setLicitacionesNotice(createMockNotice("El modulo de licitaciones"));
+      return;
+    }
+
+    setIsLicitacionesLoading(true);
+
+    try {
+      const results = await fetchLicitaciones({ fecha, estado });
+      setLicitaciones(results);
+      setLicitacionesNotice(
+        results.length ? "Resultados obtenidos desde la API real de Mercado Publico." : "La API respondio sin resultados para esta consulta."
+      );
+    } catch (error) {
+      setLicitaciones([]);
+      setLicitacionesNotice("");
+      setLicitacionesError(getMercadoPublicoErrorMessage(error));
+    } finally {
+      setIsLicitacionesLoading(false);
+    }
   };
 
   const handleLicitacionesClear = () => {
     setAppliedFilters(INITIAL_FILTERS);
     setLicitaciones(licitacionesMock);
+    pagination.goToPage(1);
+    setLicitacionesError("");
+    setSelectedLicitacion(null);
+    setDetailError("");
+    setDetailNotice("");
+    setLicitacionesNotice(createMockNotice("La vista base de licitaciones"));
   };
 
-  const handleViewDetail = (codigo) => {
-    setSelectedLicitacionCode(codigo);
+  const handleViewDetail = async (codigo) => {
     setCurrentView("detalle");
+    setDetailError("");
+
+    if (!isMercadoPublicoConfigured()) {
+      setSelectedLicitacion(licitacionesMock.find((item) => item.codigo === codigo) ?? null);
+      setDetailNotice(createMockNotice("El detalle de licitacion"));
+      return;
+    }
+
+    setSelectedLicitacion(null);
+    setDetailNotice("");
+    setIsDetailLoading(true);
+
+    try {
+      const detail = await fetchLicitacionDetail(codigo);
+      setSelectedLicitacion(detail);
+      setDetailNotice("Detalle obtenido desde la API real de Mercado Publico.");
+    } catch (error) {
+      setDetailError(getMercadoPublicoErrorMessage(error));
+    } finally {
+      setIsDetailLoading(false);
+    }
   };
 
-  const handleProveedorSearch = (rut) => {
+  const handleProveedorSearch = async (rut) => {
     const normalizedRut = normalizeRutForQuery(rut);
-    const provider = proveedoresMock.find((item) => item.rut === normalizedRut) ?? null;
-    setProveedorResult(provider);
     setCurrentView("proveedor");
-    return provider;
-  };
+    setProveedorError("");
 
-  const selectedLicitacion = licitacionesMock.find((item) => item.codigo === selectedLicitacionCode) ?? null;
+    if (!isMercadoPublicoConfigured()) {
+      const provider = proveedoresMock.find((item) => item.rut === normalizedRut) ?? null;
+      setProveedorResult(provider);
+      setProveedorNotice(createMockNotice("El modulo de proveedores"));
+      return provider;
+    }
+
+    setIsProveedorLoading(true);
+
+    try {
+      const provider = await fetchProveedorByRut(rut);
+      setProveedorResult(provider);
+      setProveedorNotice(
+        provider ? "Proveedor obtenido desde la API real de Mercado Publico." : "No se encontro un proveedor para el RUT consultado."
+      );
+      return provider;
+    } catch (error) {
+      setProveedorResult(null);
+      setProveedorNotice("");
+      setProveedorError(getMercadoPublicoErrorMessage(error));
+      return null;
+    } finally {
+      setIsProveedorLoading(false);
+    }
+  };
 
   return (
     <div className="app-shell">
@@ -222,27 +348,48 @@ function App() {
             items={licitaciones}
             onViewDetail={handleViewDetail}
             pagination={pagination}
+            isLoading={isLicitacionesLoading}
+            error={licitacionesError}
+            notice={licitacionesNotice}
           />
         )}
 
-        {currentView === "detalle" && selectedLicitacion && (
+        {currentView === "detalle" && isDetailLoading && (
           <section className="section-block section-block-tight">
+            <LoadingState
+              title="Cargando detalle de licitacion..."
+              message="Consultando el codigo seleccionado para obtener la informacion completa del proceso."
+            />
+          </section>
+        )}
+
+        {currentView === "detalle" && !isDetailLoading && selectedLicitacion && (
+          <section className="section-block section-block-tight">
+            <NoticeBanner tone="info" message={detailNotice} />
             <LicitacionDetail licitacion={selectedLicitacion} onBack={() => handleNavigate("licitaciones")} />
           </section>
         )}
 
-        {currentView === "detalle" && !selectedLicitacion && (
+        {currentView === "detalle" && !isDetailLoading && !selectedLicitacion && (
           <section className="section-block section-block-tight">
             <EmptyState
-              title="No se encontro la licitacion"
-              message="Selecciona una licitacion desde el listado para revisar su detalle completo."
+              title={detailError ? "No fue posible cargar la licitacion" : "No se encontro la licitacion"}
+              message={detailError || "Selecciona una licitacion desde el listado para revisar su detalle completo."}
               actionLabel="Volver al listado"
               onAction={() => handleNavigate("licitaciones")}
             />
           </section>
         )}
 
-        {currentView === "proveedor" && <ProveedorView result={proveedorResult} onSearch={handleProveedorSearch} />}
+        {currentView === "proveedor" && (
+          <ProveedorView
+            result={proveedorResult}
+            onSearch={handleProveedorSearch}
+            isLoading={isProveedorLoading}
+            error={proveedorError}
+            notice={proveedorNotice}
+          />
+        )}
       </PageContainer>
 
       <Footer />

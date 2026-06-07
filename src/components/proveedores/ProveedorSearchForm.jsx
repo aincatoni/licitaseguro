@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { formatRut, isValidRut } from "../../utils/rut";
 
-function ProveedorSearchForm({ onSearch }) {
+function ProveedorSearchForm({ onSearch, isLoading = false }) {
   const [rut, setRut] = useState("");
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -12,7 +12,7 @@ function ProveedorSearchForm({ onSearch }) {
     setFeedback("");
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!rut.trim()) {
@@ -25,7 +25,7 @@ function ProveedorSearchForm({ onSearch }) {
       return;
     }
 
-    const provider = onSearch(rut);
+    const provider = await onSearch(rut);
 
     if (!provider) {
       setFeedback("No se encontro un proveedor asociado al RUT ingresado en los datos mock.");
@@ -44,6 +44,7 @@ function ProveedorSearchForm({ onSearch }) {
           placeholder="12.345.678-5"
           value={rut}
           onChange={handleChange}
+          disabled={isLoading}
           aria-describedby={error ? "rut-error" : feedback ? "rut-feedback" : undefined}
           aria-invalid={error ? "true" : "false"}
         />
@@ -62,8 +63,8 @@ function ProveedorSearchForm({ onSearch }) {
       ) : null}
 
       <div className="filter-actions">
-        <button className="button button-primary" type="submit">
-          Buscar proveedor
+        <button className="button button-primary" type="submit" disabled={isLoading}>
+          {isLoading ? "Buscando..." : "Buscar proveedor"}
         </button>
       </div>
     </form>

@@ -10,7 +10,7 @@ function isSameCalendarMonth(leftDate, rightDate) {
   return leftDate.getFullYear() === rightDate.getFullYear() && leftDate.getMonth() === rightDate.getMonth();
 }
 
-function DatePickerField({ label, value, onChange, placeholder = "Selecciona una fecha" }) {
+function DatePickerField({ label, value, onChange, placeholder = "Selecciona una fecha", disabled = false }) {
   const inputId = useId();
   const containerRef = useRef(null);
   const selectedDate = parseDateValue(value);
@@ -28,12 +28,6 @@ function DatePickerField({ label, value, onChange, placeholder = "Selecciona una
 
     return years;
   }, []);
-
-  useEffect(() => {
-    if (selectedDate) {
-      setMonth(selectedDate);
-    }
-  }, [selectedDate]);
 
   useEffect(() => {
     const handlePointerDown = (event) => {
@@ -138,6 +132,7 @@ function DatePickerField({ label, value, onChange, placeholder = "Selecciona una
           className={value ? "date-picker__trigger" : "date-picker__trigger date-picker__trigger-placeholder"}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
+          disabled={disabled}
           onClick={() => setIsOpen((currentValue) => !currentValue)}
         >
           <span>{value ? formatDateForField(value) : placeholder}</span>

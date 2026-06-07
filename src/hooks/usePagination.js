@@ -1,12 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 function usePagination(items, itemsPerPage = 10) {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [items]);
 
   const safePage = Math.min(currentPage, totalPages);
   const startIndex = (safePage - 1) * itemsPerPage;

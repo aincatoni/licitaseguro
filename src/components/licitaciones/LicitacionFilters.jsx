@@ -1,5 +1,6 @@
 import { useState } from "react";
 import DatePickerField from "../common/DatePickerField";
+import SelectField from "../common/SelectField";
 
 const ESTADO_OPTIONS = [
   { value: "", label: "Todos los estados" },
@@ -9,14 +10,13 @@ const ESTADO_OPTIONS = [
   { value: "desierta", label: "Desierta" },
 ];
 
-function LicitacionFilters({ initialValues, onSearch, onClear }) {
+function LicitacionFilters({ initialValues, onSearch, onClear, isLoading = false }) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setValues((currentValues) => ({ ...currentValues, [name]: value }));
-    setErrors((currentErrors) => ({ ...currentErrors, [name]: "", form: "" }));
+  const handleEstadoChange = (value) => {
+    setValues((currentValues) => ({ ...currentValues, estado: value }));
+    setErrors((currentErrors) => ({ ...currentErrors, estado: "", form: "" }));
   };
 
   const handleDateChange = (value) => {
@@ -24,7 +24,7 @@ function LicitacionFilters({ initialValues, onSearch, onClear }) {
     setErrors((currentErrors) => ({ ...currentErrors, fecha: "", form: "" }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!values.fecha && !values.estado) {
@@ -32,7 +32,7 @@ function LicitacionFilters({ initialValues, onSearch, onClear }) {
       return;
     }
 
-    onSearch(values);
+    await onSearch(values);
   };
 
   const handleClear = () => {
@@ -45,18 +45,16 @@ function LicitacionFilters({ initialValues, onSearch, onClear }) {
   return (
     <form className="filter-panel" onSubmit={handleSubmit} noValidate>
       <div className="filter-grid">
-        <DatePickerField label="Fecha de cierre" value={values.fecha} onChange={handleDateChange} />
+        <DatePickerField label="Fecha de cierre" value={values.fecha} onChange={handleDateChange} disabled={isLoading} />
 
-        <div className="field-group">
-          <label htmlFor="estado">Estado</label>
-          <select id="estado" name="estado" value={values.estado} onChange={handleChange}>
-            {ESTADO_OPTIONS.map((option) => (
-              <option key={option.value || "all"} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <SelectField
+          label="Estado"
+          value={values.estado}
+          onChange={handleEstadoChange}
+          options={ESTADO_OPTIONS}
+          placeholder="Todos los estados"
+          disabled={isLoading}
+        />
       </div>
 
       {errors.form ? (
@@ -66,10 +64,10 @@ function LicitacionFilters({ initialValues, onSearch, onClear }) {
       ) : null}
 
       <div className="filter-actions">
-        <button className="button button-primary" type="submit">
-          Buscar
+        <button className="button button-primary" type="submit" disabled={isLoading}>
+          {isLoading ? "Buscando..." : "Buscar"}
         </button>
-        <button className="button button-secondary" type="button" onClick={handleClear}>
+        <button className="button button-secondary" type="button" onClick={handleClear} disabled={isLoading}>
           Limpiar
         </button>
       </div>

@@ -7,11 +7,15 @@ function ProveedorResultCard({ proveedor }) {
         <div>
           <p className="detail-code">Proveedor encontrado</p>
           <h2>{fallbackText(proveedor.razonSocial)}</h2>
-          <p>Resultado obtenido desde el set mock de proveedores preparado para la integracion real.</p>
+          <p>{fallbackText(proveedor.resumen, "Resultado disponible para la consulta de proveedor por RUT.")}</p>
         </div>
       </header>
 
       <dl className="detail-grid">
+        <div className="detail-row">
+          <dt>Codigo empresa</dt>
+          <dd>{fallbackText(proveedor.codigoEmpresa)}</dd>
+        </div>
         <div className="detail-row">
           <dt>RUT</dt>
           <dd>{fallbackText(proveedor.rutFormateado)}</dd>
