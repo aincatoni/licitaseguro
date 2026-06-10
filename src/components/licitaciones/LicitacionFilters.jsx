@@ -27,10 +27,7 @@ function LicitacionFilters({ initialValues, onSearch, onClear, isLoading = false
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!values.fecha && !values.estado) {
-      setErrors({ form: "Ingresa una fecha o selecciona un estado para filtrar licitaciones." });
-      return;
-    }
+    setErrors({});
 
     await onSearch(values);
   };

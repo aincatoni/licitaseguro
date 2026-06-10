@@ -13,6 +13,7 @@ import ProveedorResultCard from "./components/proveedores/ProveedorResultCard";
 import ProveedorSearchForm from "./components/proveedores/ProveedorSearchForm";
 import { licitacionesMock, proveedoresMock } from "./data/mockData";
 import usePagination from "./hooks/usePagination";
+import { formatDateForDisplay } from "./utils/date";
 import { normalizeRutForQuery } from "./utils/rut";
 import {
   fetchLicitacionDetail,
@@ -33,6 +34,20 @@ function wait(ms) {
   return new Promise((resolve) => {
     window.setTimeout(resolve, ms);
   });
+}
+
+function getMaxFechaCierre(items) {
+  return items.reduce((latestDate, item) => {
+    return item.fechaCierre > latestDate ? item.fechaCierre : latestDate;
+  }, "");
+}
+
+function getLicitacionesEmptyMessage(fechaBuscada, maxFechaCierre) {
+  if (fechaBuscada && maxFechaCierre && fechaBuscada > maxFechaCierre) {
+    return `No hay licitaciones con fecha de cierre posterior a ${formatDateForDisplay(maxFechaCierre)}. Prueba con una fecha igual o anterior.`;
+  }
+
+  return "Prueba otro estado o una fecha distinta para obtener resultados.";
 }
 
 function HomeView({ onNavigate }) {
@@ -137,6 +152,7 @@ function LicitacionesView({
   isLoading,
   error,
   notice,
+  emptyMessage,
 }) {
   return (
     <>
@@ -163,7 +179,7 @@ function LicitacionesView({
             items={items}
             onViewDetail={onViewDetail}
             pagination={pagination}
-            emptyMessage="Prueba otro estado o una fecha distinta para obtener resultados."
+            emptyMessage={emptyMessage}
           />
         )}
       </section>
@@ -216,6 +232,7 @@ function App() {
   const [selectedLicitacion, setSelectedLicitacion] = useState(null);
   const [licitacionesError, setLicitacionesError] = useState("");
   const [licitacionesNotice, setLicitacionesNotice] = useState("");
+  const [licitacionesEmptyMessage, setLicitacionesEmptyMessage] = useState("Prueba otro estado o una fecha distinta para obtener resultados.");
   const [detailError, setDetailError] = useState("");
   const [detailNotice, setDetailNotice] = useState("");
   const [isLicitacionesLoading, setIsLicitacionesLoading] = useState(false);
@@ -244,6 +261,8 @@ function App() {
 
       await wait(MOCK_REQUEST_DELAY_MS);
 
+      const maxFechaCierre = getMaxFechaCierre(licitacionesMock);
+
       const filteredItems = licitacionesMock.filter((item) => {
         const matchesFecha = !fecha || item.fechaCierre === fecha;
         const matchesEstado = !estado || item.estado === estado;
@@ -251,6 +270,7 @@ function App() {
       });
 
       setLicitaciones(filteredItems);
+      setLicitacionesEmptyMessage(getLicitacionesEmptyMessage(fecha, maxFechaCierre));
       setLicitacionesNotice("");
       setIsLicitacionesLoading(false);
       return;
@@ -260,10 +280,12 @@ function App() {
 
     try {
       const results = await fetchLicitaciones({ fecha, estado });
-      setLicitaciones(results);
+      setLicitaciones(results.items);
+      setLicitacionesEmptyMessage(getLicitacionesEmptyMessage(fecha, results.maxFechaCierre));
       setLicitacionesNotice("");
     } catch (error) {
       setLicitaciones([]);
+      setLicitacionesEmptyMessage("Prueba otro estado o una fecha distinta para obtener resultados.");
       setLicitacionesNotice("");
       setLicitacionesError(getMercadoPublicoErrorMessage(error));
     } finally {
@@ -280,6 +302,7 @@ function App() {
     setDetailError("");
     setDetailNotice("");
     setLicitacionesNotice("");
+    setLicitacionesEmptyMessage("Prueba otro estado o una fecha distinta para obtener resultados.");
   };
 
   const handleViewDetail = async (codigo) => {
@@ -364,6 +387,7 @@ function App() {
             isLoading={isLicitacionesLoading}
             error={licitacionesError}
             notice={licitacionesNotice}
+            emptyMessage={licitacionesEmptyMessage}
           />
         )}
 

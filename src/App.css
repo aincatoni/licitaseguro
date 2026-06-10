@@ -749,7 +749,12 @@
 
 .licitacion-card {
   display: grid;
+  grid-template-rows: auto auto 1fr auto;
   gap: 1rem;
+}
+
+.licitacion-card > .button {
+  align-self: end;
 }
 
 .licitacion-card__top,
@@ -758,6 +763,10 @@
   justify-content: space-between;
   gap: 1rem;
   align-items: flex-start;
+}
+
+.licitacion-card__top > div {
+  min-width: 0;
 }
 
 .licitacion-meta-grid {
@@ -813,6 +822,22 @@
 .detail-panel {
   display: grid;
   gap: 1.5rem;
+}
+
+.detail-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.detail-back-link:hover {
+  color: #1d4ed8;
 }
 
 .detail-grid {

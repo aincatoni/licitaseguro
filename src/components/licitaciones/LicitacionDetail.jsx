@@ -14,8 +14,9 @@ function DetailRow({ label, value }) {
 function LicitacionDetail({ licitacion, onBack }) {
   return (
     <article className="detail-panel">
-      <button className="button button-secondary" onClick={onBack}>
-        Volver al listado
+      <button className="detail-back-link" onClick={onBack}>
+        <span aria-hidden="true">←</span>
+        <span>Volver al listado</span>
       </button>
 
       <header className="detail-header">

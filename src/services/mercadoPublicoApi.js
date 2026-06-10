@@ -67,22 +67,13 @@ async function requestJson(pathname, params) {
   return payload;
 }
 
-function toApiDateValue(dateValue) {
-  if (!dateValue) {
-    return "";
-  }
-
-  const [year, month, day] = String(dateValue).split("-");
-
-  if (!year || !month || !day) {
-    return "";
-  }
+function getCurrentApiDateValue() {
+  const today = new Date();
+  const day = String(today.getDate()).padStart(2, "0");
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const year = today.getFullYear();
 
   return `${day}${month}${year}`;
-}
-
-function getCurrentApiDateValue() {
-  return toApiDateValue(new Date().toISOString().slice(0, 10));
 }
 
 function toDateOnly(dateValue) {
@@ -133,6 +124,12 @@ function normalizeLicitacionListItem(item) {
   };
 }
 
+function getMaxFechaCierre(items) {
+  return items.reduce((latestDate, item) => {
+    return item.fechaCierre > latestDate ? item.fechaCierre : latestDate;
+  }, "");
+}
+
 function normalizeProveedorResult(item, rut) {
   return {
     codigoEmpresa: sanitizeText(item?.CodigoEmpresa),
@@ -176,6 +173,7 @@ export async function fetchLicitaciones(filters) {
   }
 
   let items = payload.Listado.map(normalizeLicitacionListItem);
+  const maxFechaCierre = getMaxFechaCierre(items);
 
   if (filters.fecha) {
     items = items.filter((item) => item.fechaCierre === filters.fecha);
@@ -185,7 +183,10 @@ export async function fetchLicitaciones(filters) {
     items = items.filter((item) => item.estado === filters.estado);
   }
 
-  return items;
+  return {
+    items,
+    maxFechaCierre,
+  };
 }
 
 export async function fetchLicitacionDetail(codigo) {
