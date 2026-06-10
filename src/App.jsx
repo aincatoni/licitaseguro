@@ -28,6 +28,14 @@ const INITIAL_FILTERS = {
   estado: "",
 };
 
+const MOCK_REQUEST_DELAY_MS = 500;
+
+function wait(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
 function HomeView({ onNavigate }) {
   return (
     <>
@@ -238,6 +246,10 @@ function App() {
     pagination.goToPage(1);
 
     if (!isMercadoPublicoConfigured()) {
+      setIsLicitacionesLoading(true);
+
+      await wait(MOCK_REQUEST_DELAY_MS);
+
       const filteredItems = licitacionesMock.filter((item) => {
         const matchesFecha = !fecha || item.fechaCierre === fecha;
         const matchesEstado = !estado || item.estado === estado;
@@ -246,6 +258,7 @@ function App() {
 
       setLicitaciones(filteredItems);
       setLicitacionesNotice(createMockNotice("El modulo de licitaciones"));
+      setIsLicitacionesLoading(false);
       return;
     }
 
@@ -282,8 +295,13 @@ function App() {
     setDetailError("");
 
     if (!isMercadoPublicoConfigured()) {
+      setIsDetailLoading(true);
+
+      await wait(MOCK_REQUEST_DELAY_MS);
+
       setSelectedLicitacion(licitacionesMock.find((item) => item.codigo === codigo) ?? null);
       setDetailNotice(createMockNotice("El detalle de licitacion"));
+      setIsDetailLoading(false);
       return;
     }
 
@@ -308,9 +326,14 @@ function App() {
     setProveedorError("");
 
     if (!isMercadoPublicoConfigured()) {
+      setIsProveedorLoading(true);
+
+      await wait(MOCK_REQUEST_DELAY_MS);
+
       const provider = proveedoresMock.find((item) => item.rut === normalizedRut) ?? null;
       setProveedorResult(provider);
       setProveedorNotice(createMockNotice("El modulo de proveedores"));
+      setIsProveedorLoading(false);
       return provider;
     }
 
