@@ -15,7 +15,6 @@ import { licitacionesMock, proveedoresMock } from "./data/mockData";
 import usePagination from "./hooks/usePagination";
 import { normalizeRutForQuery } from "./utils/rut";
 import {
-  createMockNotice,
   fetchLicitacionDetail,
   fetchLicitaciones,
   fetchProveedorByRut,
@@ -221,14 +220,14 @@ function App() {
   const [licitaciones, setLicitaciones] = useState(licitacionesMock);
   const [selectedLicitacion, setSelectedLicitacion] = useState(null);
   const [licitacionesError, setLicitacionesError] = useState("");
-  const [licitacionesNotice, setLicitacionesNotice] = useState(createMockNotice("El modulo de licitaciones"));
+  const [licitacionesNotice, setLicitacionesNotice] = useState("");
   const [detailError, setDetailError] = useState("");
   const [detailNotice, setDetailNotice] = useState("");
   const [isLicitacionesLoading, setIsLicitacionesLoading] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [proveedorResult, setProveedorResult] = useState(null);
   const [proveedorError, setProveedorError] = useState("");
-  const [proveedorNotice, setProveedorNotice] = useState(createMockNotice("El modulo de proveedores"));
+  const [proveedorNotice, setProveedorNotice] = useState("");
   const [isProveedorLoading, setIsProveedorLoading] = useState(false);
 
   const pagination = usePagination(licitaciones, 10);
@@ -257,7 +256,7 @@ function App() {
       });
 
       setLicitaciones(filteredItems);
-      setLicitacionesNotice(createMockNotice("El modulo de licitaciones"));
+      setLicitacionesNotice("");
       setIsLicitacionesLoading(false);
       return;
     }
@@ -267,9 +266,7 @@ function App() {
     try {
       const results = await fetchLicitaciones({ fecha, estado });
       setLicitaciones(results);
-      setLicitacionesNotice(
-        results.length ? "Resultados obtenidos desde la API real de Mercado Publico." : "La API respondio sin resultados para esta consulta."
-      );
+      setLicitacionesNotice("");
     } catch (error) {
       setLicitaciones([]);
       setLicitacionesNotice("");
@@ -287,7 +284,7 @@ function App() {
     setSelectedLicitacion(null);
     setDetailError("");
     setDetailNotice("");
-    setLicitacionesNotice(createMockNotice("La vista base de licitaciones"));
+    setLicitacionesNotice("");
   };
 
   const handleViewDetail = async (codigo) => {
@@ -300,7 +297,7 @@ function App() {
       await wait(MOCK_REQUEST_DELAY_MS);
 
       setSelectedLicitacion(licitacionesMock.find((item) => item.codigo === codigo) ?? null);
-      setDetailNotice(createMockNotice("El detalle de licitacion"));
+      setDetailNotice("");
       setIsDetailLoading(false);
       return;
     }
@@ -312,7 +309,7 @@ function App() {
     try {
       const detail = await fetchLicitacionDetail(codigo);
       setSelectedLicitacion(detail);
-      setDetailNotice("Detalle obtenido desde la API real de Mercado Publico.");
+      setDetailNotice("");
     } catch (error) {
       setDetailError(getMercadoPublicoErrorMessage(error));
     } finally {
@@ -332,7 +329,7 @@ function App() {
 
       const provider = proveedoresMock.find((item) => item.rut === normalizedRut) ?? null;
       setProveedorResult(provider);
-      setProveedorNotice(createMockNotice("El modulo de proveedores"));
+      setProveedorNotice("");
       setIsProveedorLoading(false);
       return provider;
     }
@@ -342,9 +339,7 @@ function App() {
     try {
       const provider = await fetchProveedorByRut(rut);
       setProveedorResult(provider);
-      setProveedorNotice(
-        provider ? "Proveedor obtenido desde la API real de Mercado Publico." : "No se encontro un proveedor para el RUT consultado."
-      );
+      setProveedorNotice("");
       return provider;
     } catch (error) {
       setProveedorResult(null);

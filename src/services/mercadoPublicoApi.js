@@ -81,6 +81,10 @@ function toApiDateValue(dateValue) {
   return `${day}${month}${year}`;
 }
 
+function getCurrentApiDateValue() {
+  return toApiDateValue(new Date().toISOString().slice(0, 10));
+}
+
 function toDateOnly(dateValue) {
   const sanitized = sanitizeText(dateValue);
   return sanitized ? sanitized.slice(0, 10) : "";
@@ -162,9 +166,9 @@ export function getMercadoPublicoErrorMessage(error) {
 
 export async function fetchLicitaciones(filters) {
   const payload = await requestJson("/publico/licitaciones.json", {
-    fecha: toApiDateValue(filters.fecha),
-    // Nota: La API de Mercado Público no soporta filtrado por estado
-    // Se filtra del lado del cliente después
+    // La API rechaza fechas futuras, por eso siempre consultamos con la fecha actual
+    // y aplicamos los filtros visibles de la UI sobre la fecha de cierre retornada.
+    fecha: getCurrentApiDateValue(),
   });
 
   if (!Array.isArray(payload?.Listado)) {
@@ -173,7 +177,10 @@ export async function fetchLicitaciones(filters) {
 
   let items = payload.Listado.map(normalizeLicitacionListItem);
 
-  // Filtro del lado del cliente por estado
+  if (filters.fecha) {
+    items = items.filter((item) => item.fechaCierre === filters.fecha);
+  }
+
   if (filters.estado) {
     items = items.filter((item) => item.estado === filters.estado);
   }
