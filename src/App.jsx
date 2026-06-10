@@ -121,10 +121,10 @@ function HomeView({ onNavigate }) {
         <div className="cta-panel">
           <div>
             <p className="section-kicker">Acceso rapido</p>
-            <h2>Continua directamente hacia los modulos evaluados</h2>
+            <h2>Accede rapidamente a las consultas principales</h2>
             <p>
-              El examen prioriza experiencia de usuario, validaciones, accesibilidad y consumo de datos. Esta base ya
-              deja resueltos los puntos de entrada principales.
+              Revisa licitaciones disponibles o consulta proveedores desde un mismo punto de acceso, con una navegacion
+              simple y enfocada en las tareas mas frecuentes.
             </p>
           </div>
 
