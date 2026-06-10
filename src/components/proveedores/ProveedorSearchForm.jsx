@@ -1,35 +1,20 @@
-import { useState } from "react";
-import { formatRut, isValidRut } from "../../utils/rut";
-
-function ProveedorSearchForm({ onSearch, isLoading = false }) {
-  const [rut, setRut] = useState("");
-  const [error, setError] = useState("");
-  const [feedback, setFeedback] = useState("");
+function ProveedorSearchForm({
+  rut,
+  onRutChange,
+  onSearch,
+  error = "",
+  feedback = "",
+  isLoading = false,
+}) {
 
   const handleChange = (event) => {
-    setRut(formatRut(event.target.value));
-    setError("");
-    setFeedback("");
+    onRutChange(event.target.value);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!rut.trim()) {
-      setError("El RUT es obligatorio.");
-      return;
-    }
-
-    if (!isValidRut(rut)) {
-      setError("Ingresa un RUT valido con digito verificador correcto.");
-      return;
-    }
-
-    const provider = await onSearch(rut);
-
-    if (!provider) {
-      setFeedback("No se encontro un proveedor asociado al RUT ingresado.");
-    }
+    await onSearch();
   };
 
   return (

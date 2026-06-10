@@ -40,9 +40,10 @@ function getRequiredTicket() {
   return MERCADO_PUBLICO_TICKET;
 }
 
-async function requestJson(pathname, params) {
+async function requestJson(pathname, params, options = {}) {
   const ticket = getRequiredTicket();
   const url = createUrl(pathname, { ...params, ticket });
+  const allowedErrorCodes = options.allowedErrorCodes ?? [];
 
   let response;
 
@@ -52,16 +53,20 @@ async function requestJson(pathname, params) {
     throw new MercadoPublicoError("network", ERROR_MESSAGES.network);
   }
 
-  if (!response.ok) {
-    throw new MercadoPublicoError("network", ERROR_MESSAGES.network);
-  }
-
   let payload;
 
   try {
     payload = await response.json();
   } catch {
     throw new MercadoPublicoError("response", ERROR_MESSAGES.response);
+  }
+
+  if (!response.ok) {
+    if (allowedErrorCodes.includes(payload?.Codigo)) {
+      return payload;
+    }
+
+    throw new MercadoPublicoError("network", ERROR_MESSAGES.network);
   }
 
   return payload;
@@ -201,9 +206,15 @@ export async function fetchLicitacionDetail(codigo) {
 }
 
 export async function fetchProveedorByRut(rut) {
-  const payload = await requestJson("/Publico/Empresas/BuscarProveedor", {
-    rutempresaproveedor: formatRut(rut),
-  });
+  const payload = await requestJson(
+    "/Publico/Empresas/BuscarProveedor",
+    {
+      rutempresaproveedor: formatRut(rut),
+    },
+    {
+      allowedErrorCodes: [10200],
+    },
+  );
 
   const item = payload?.listaEmpresas?.[0];
 

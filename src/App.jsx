@@ -14,7 +14,7 @@ import ProveedorSearchForm from "./components/proveedores/ProveedorSearchForm";
 import { licitacionesMock, proveedoresMock } from "./data/mockData";
 import usePagination from "./hooks/usePagination";
 import { formatDateForDisplay } from "./utils/date";
-import { normalizeRutForQuery } from "./utils/rut";
+import { cleanRut, formatRut, isValidRut, normalizeRutForQuery } from "./utils/rut";
 import {
   fetchLicitacionDetail,
   fetchLicitaciones,
@@ -48,6 +48,19 @@ function getLicitacionesEmptyMessage(fechaBuscada, maxFechaCierre) {
   }
 
   return "Prueba otro estado o una fecha distinta para obtener resultados.";
+}
+
+function getReactiveRutError(value) {
+  const cleanedRut = cleanRut(value);
+
+  // La mascara agrega guion apenas hay suficientes caracteres para formar un DV.
+  // Para no validar demasiado pronto mientras el usuario aun escribe el cuerpo,
+  // solo mostramos error reactivo cuando ya hay al menos 9 caracteres limpios.
+  if (cleanedRut.length < 9 || isValidRut(value)) {
+    return "";
+  }
+
+  return "Ingresa un RUT valido con digito verificador correcto.";
 }
 
 function HomeView({ onNavigate }) {
@@ -187,7 +200,7 @@ function LicitacionesView({
   );
 }
 
-function ProveedorView({ result, onSearch, isLoading, error, notice }) {
+function ProveedorView({ result, rut, onRutChange, onSearch, validationError, feedback, isLoading, error, notice }) {
   return (
     <>
       <section className="section-block section-block-tight">
@@ -197,7 +210,14 @@ function ProveedorView({ result, onSearch, isLoading, error, notice }) {
           <p>El formulario aplica limpieza, formateo y validacion del RUT antes de consultar la informacion del proveedor.</p>
         </div>
 
-        <ProveedorSearchForm onSearch={onSearch} isLoading={isLoading} />
+        <ProveedorSearchForm
+          rut={rut}
+          onRutChange={onRutChange}
+          onSearch={onSearch}
+          error={validationError}
+          feedback={feedback}
+          isLoading={isLoading}
+        />
       </section>
 
       <section className="section-block section-block-tight">
@@ -238,6 +258,9 @@ function App() {
   const [isLicitacionesLoading, setIsLicitacionesLoading] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [proveedorResult, setProveedorResult] = useState(null);
+  const [proveedorRut, setProveedorRut] = useState("");
+  const [proveedorValidationError, setProveedorValidationError] = useState("");
+  const [proveedorFeedback, setProveedorFeedback] = useState("");
   const [proveedorError, setProveedorError] = useState("");
   const [proveedorNotice, setProveedorNotice] = useState("");
   const [isProveedorLoading, setIsProveedorLoading] = useState(false);
@@ -335,10 +358,38 @@ function App() {
     }
   };
 
-  const handleProveedorSearch = async (rut) => {
-    const normalizedRut = normalizeRutForQuery(rut);
-    setCurrentView("proveedor");
+  const handleProveedorRutChange = (nextValue) => {
+    const formattedRut = formatRut(nextValue);
+
+    setProveedorRut(formattedRut);
+    setProveedorValidationError(getReactiveRutError(formattedRut));
+    setProveedorFeedback("");
     setProveedorError("");
+    setProveedorNotice("");
+    setProveedorResult(null);
+  };
+
+  const handleProveedorSearch = async () => {
+    const rut = proveedorRut;
+    const normalizedRut = normalizeRutForQuery(rut);
+
+    setCurrentView("proveedor");
+    setProveedorResult(null);
+    setProveedorFeedback("");
+    setProveedorError("");
+    setProveedorNotice("");
+
+    if (!rut.trim()) {
+      setProveedorValidationError("El RUT es obligatorio.");
+      return null;
+    }
+
+    if (!isValidRut(rut)) {
+      setProveedorValidationError("Ingresa un RUT valido con digito verificador correcto.");
+      return null;
+    }
+
+    setProveedorValidationError("");
 
     if (!isMercadoPublicoConfigured()) {
       setIsProveedorLoading(true);
@@ -347,6 +398,7 @@ function App() {
 
       const provider = proveedoresMock.find((item) => item.rut === normalizedRut) ?? null;
       setProveedorResult(provider);
+      setProveedorFeedback(provider ? "" : "No se encontro un proveedor asociado al RUT ingresado.");
       setProveedorNotice("");
       setIsProveedorLoading(false);
       return provider;
@@ -357,10 +409,12 @@ function App() {
     try {
       const provider = await fetchProveedorByRut(rut);
       setProveedorResult(provider);
+      setProveedorFeedback(provider ? "" : "No se encontro un proveedor asociado al RUT ingresado.");
       setProveedorNotice("");
       return provider;
     } catch (error) {
       setProveedorResult(null);
+      setProveedorFeedback("");
       setProveedorNotice("");
       setProveedorError(getMercadoPublicoErrorMessage(error));
       return null;
@@ -421,7 +475,11 @@ function App() {
         {currentView === "proveedor" && (
           <ProveedorView
             result={proveedorResult}
+            rut={proveedorRut}
+            onRutChange={handleProveedorRutChange}
             onSearch={handleProveedorSearch}
+            validationError={proveedorValidationError}
+            feedback={proveedorFeedback}
             isLoading={isProveedorLoading}
             error={proveedorError}
             notice={proveedorNotice}
