@@ -28,7 +28,7 @@ function ProveedorSearchForm({ onSearch, isLoading = false }) {
     const provider = await onSearch(rut);
 
     if (!provider) {
-      setFeedback("No se encontro un proveedor asociado al RUT ingresado en los datos mock.");
+      setFeedback("No se encontro un proveedor asociado al RUT ingresado.");
     }
   };
 

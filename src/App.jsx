@@ -60,10 +60,10 @@ function HomeView({ onNavigate }) {
       <section className="section-block">
         <div className="section-heading">
           <p className="section-kicker">Propuesta de valor</p>
-          <h2>Base funcional alineada con el plan tecnico</h2>
+          <h2>Informacion publica en un entorno claro y accesible</h2>
           <p>
-            Esta primera entrega deja lista la estructura visual, la navegacion y los modulos clave para seguir con
-            la integracion real de la API.
+            La plataforma centraliza consultas de licitaciones y proveedores con una experiencia orientada a
+            legibilidad, rapidez de uso y navegacion simple.
           </p>
         </div>
 
@@ -96,8 +96,8 @@ function HomeView({ onNavigate }) {
             <span className="info-icon" aria-hidden="true">
               API
             </span>
-            <h3>Preparada para API</h3>
-            <p>Los modulos ya trabajan con filtros, paginacion y validaciones para conectar endpoints reales.</p>
+            <h3>Consulta integrada</h3>
+            <p>Los modulos integran filtros, paginacion y validaciones para consultar informacion publica de forma ordenada.</p>
           </article>
         </div>
       </section>
@@ -144,9 +144,7 @@ function LicitacionesView({
         <div className="section-heading section-heading-left">
           <p className="section-kicker">Modulo principal</p>
           <h1>Licitaciones publicas</h1>
-          <p>
-            Filtra por fecha y estado para revisar resultados mock preparados para la siguiente etapa de integracion.
-          </p>
+          <p>Filtra por fecha de cierre y estado para revisar licitaciones de forma rapida y ordenada.</p>
         </div>
 
         <LicitacionFilters initialValues={filters} onSearch={onSearch} onClear={onClear} isLoading={isLoading} />
@@ -180,10 +178,7 @@ function ProveedorView({ result, onSearch, isLoading, error, notice }) {
         <div className="section-heading section-heading-left">
           <p className="section-kicker">Busqueda por RUT</p>
           <h1>Consulta de proveedor</h1>
-          <p>
-            El formulario aplica limpieza, formateo y validacion del RUT antes de revisar un conjunto mock de
-            proveedores.
-          </p>
+          <p>El formulario aplica limpieza, formateo y validacion del RUT antes de consultar la informacion del proveedor.</p>
         </div>
 
         <ProveedorSearchForm onSearch={onSearch} isLoading={isLoading} />
@@ -206,7 +201,7 @@ function ProveedorView({ result, onSearch, isLoading, error, notice }) {
         {!isLoading && !result ? (
           <EmptyState
             title="Aun no hay proveedor seleccionado"
-            message="Ingresa un RUT valido para revisar si existe una coincidencia en Mercado Publico o en la base mock local."
+            message="Ingresa un RUT valido para revisar si existe una coincidencia disponible para la consulta de proveedor."
           />
         ) : null}
       </section>
