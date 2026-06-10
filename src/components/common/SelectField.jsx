@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 
 function SelectField({ label, value, onChange, options, placeholder = "Selecciona una opcion", disabled = false }) {
   const inputId = useId();
@@ -10,44 +10,37 @@ function SelectField({ label, value, onChange, options, placeholder = "Seleccion
     [options, value],
   );
 
-  useEffect(() => {
-    const handlePointerDown = (event) => {
-      if (!containerRef.current?.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (disabled) {
-      setIsOpen(false);
-    }
-  }, [disabled]);
-
   const handleSelect = (nextValue) => {
     onChange(nextValue);
     setIsOpen(false);
   };
 
+  const handleButtonClick = () => {
+    if (disabled) {
+      setIsOpen(false);
+      return;
+    }
+
+    setIsOpen((currentValue) => !currentValue);
+  };
+
+  const handlePointerDown = (event) => {
+    if (!containerRef.current?.contains(event.target)) {
+      setIsOpen(false);
+    }
+  };
+
+  const handleEscape = (event) => {
+    if (event.key === "Escape") {
+      setIsOpen(false);
+    }
+  };
+
   return (
-    <div className="field-group">
+    <div className="field-group" onBlur={(event) => !event.currentTarget.contains(event.relatedTarget) && setIsOpen(false)}>
       <label htmlFor={inputId}>{label}</label>
 
-      <div className="date-picker" ref={containerRef}>
+      <div className="date-picker" ref={containerRef} onMouseDownCapture={handlePointerDown} onKeyDown={handleEscape}>
         <button
           id={inputId}
           type="button"
@@ -55,7 +48,7 @@ function SelectField({ label, value, onChange, options, placeholder = "Seleccion
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           disabled={disabled}
-          onClick={() => setIsOpen((currentValue) => !currentValue)}
+          onClick={handleButtonClick}
         >
           <span>{selectedOption?.label ?? placeholder}</span>
           <span className="date-picker__icon" aria-hidden="true">
