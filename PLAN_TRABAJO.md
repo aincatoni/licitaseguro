@@ -99,6 +99,10 @@ Desarrollar el sitio web de `LicitaSeguro` en React + Vite para cumplir la pauta
    - error de red o API
 4. Consumir el endpoint real de proveedor. `Completado`
 5. Mostrar datos normalizados del proveedor si existe resultado. `Completado`
+6. **BUG:** Race condition al hacer clic repetido en el mismo RUT. `Pendiente`
+   - El guard `isProveedorLoading` usa closure estale, permitiendo multiples requests concurrentes
+   - Refactorizar con `AbortController` o bloqueo con ref para cancelar requests anteriores
+   - O alternativamente, deshabilitar el boton inmediatamente con una ref en vez de state
 
 ## Fase 9: Accesibilidad y usabilidad
 
@@ -137,9 +141,12 @@ Desarrollar el sitio web de `LicitaSeguro` en React + Vite para cumplir la pauta
 
 ## Proxima sesion sugerida
 
-1. Hacer QA final de responsive y accesibilidad con datos reales.
-2. Verificar comportamiento real en navegador con el ticket local.
-3. Ajustar mensajes y campos faltantes segun restricciones de la API.
+1. **BUG PRIORITARIO:** Arreglar race condition en busqueda de proveedor (`handleProveedorSearch` en `App.jsx:373`).
+   - Al hacer clic repetido en el mismo RUT pasan multiples requests porque el guard `isProveedorLoading` depende de state de React que no se actualiza sincronamente.
+   - Solucion propuesta: usar una `ref` para bloqueo inmediato + `AbortController` para cancelar requests previas.
+2. Hacer QA final de responsive y accesibilidad con datos reales.
+3. Verificar comportamiento real en navegador con el ticket local.
+4. Ajustar mensajes y campos faltantes segun restricciones de la API.
 
 ## Checklist rapido
 
@@ -153,6 +160,7 @@ Desarrollar el sitio web de `LicitaSeguro` en React + Vite para cumplir la pauta
 - [x] Detalle de licitacion implementado
 - [x] Busqueda de proveedor por RUT implementada
 - [x] Validaciones completas en base mock
+- [ ] **BUG:** Race condition en busqueda de proveedor (muchos clicks al mismo RUT)
 - [ ] Accesibilidad revisada
 - [ ] Responsive revisado
 - [ ] Informe preparado
