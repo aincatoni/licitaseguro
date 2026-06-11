@@ -16,7 +16,15 @@ Construir el proyecto `Licitaseguro` sobre la base actual de React + Vite, dejan
 - La busqueda de proveedor por RUT ya tiene validacion y resultados mock.
 - El filtro de fecha ya no usa `input[type="date"]` nativo: ahora usa un calendario custom para evitar problemas de Safari.
 - La vista del calendario ya permite cambiar mes y año, incluyendo una vista interna de seleccion de años.
+- La integracion con Mercado Publico ya incorpora un cooldown real entre requests para evitar errores por consultas consecutivas demasiado rapidas.
+- El detalle de licitacion ya conserva un fallback desde el listado cuando la consulta real falla.
+- La entrada inicial al modulo de licitaciones ya intenta usar API real cuando existe `VITE_MERCADO_PUBLICO_TICKET`, evitando mezclar innecesariamente listado mock con detalle real.
 - `npm run build` compila correctamente con la base actual.
+
+## Decision de despliegue para la evaluacion
+- La pauta exige consumo real de endpoints, manejo de errores y uso del `ticket`, pero no exige backend intermedio.
+- Para esta entrega, es correcto usar `VITE_MERCADO_PUBLICO_TICKET` en `.env.local` o inyectarlo desde un `secret` del pipeline si el build ocurre en CI.
+- A nivel profesional, esa credencial queda expuesta al compilar un frontend con Vite, por lo que en produccion la alternativa correcta seria mover el consumo a backend o serverless.
 
 ## Arquitectura propuesta
 
@@ -253,6 +261,7 @@ getProveedorByRut({ rut, ticket })
 Responsabilidades:
 - Armar URL.
 - Ejecutar `fetch`.
+- Respetar una ventana minima entre requests consecutivos al endpoint real.
 - Controlar `response.ok`.
 - Parsear JSON.
 - Lanzar errores semanticos.

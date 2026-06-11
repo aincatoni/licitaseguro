@@ -91,7 +91,16 @@ return items;
 - Troubleshooting
 - Checklist final
 
-### 5. Template de Configuración
+### 5. Request Cooldown Fix
+**Archivo:** `src/services/mercadoPublicoApi.js`
+
+**Problema:** Al consultar Mercado Público inmediatamente después de habilitarse de nuevo el botón de búsqueda, la API aún podía responder con error de red.
+
+**Solución:** Implementar un cooldown real compartido a nivel de servicio para espaciar requests consecutivos a la API, independiente del cooldown visual del botón.
+
+**Impacto:** La consulta deja de fallar al hacer clic apenas se reactiva el botón, manteniendo una UX consistente en licitaciones y proveedores.
+
+### 6. Template de Configuración
 **Archivo:** `.env.local.example`
 
 - Instrucciones claras para obtener token
@@ -147,6 +156,8 @@ Si no hay token configurado o hay error de red, la app automáticamente usa dato
 2. **Normalización de Datos:** Todos los datos se normalizan antes de usarse en componentes (utils/licitaciones.js, utils/rut.js).
 
 3. **Componentes Custom:** DatePickerField y SelectField custom para mejor UX que inputs nativos.
+
+4. **Cooldown en Servicio:** La proteccion contra consultas consecutivas a Mercado Público se resuelve en `mercadoPublicoApi.js`, no solo en el estado visual de los botones.
 
 ---
 
