@@ -1,6 +1,14 @@
 # LicitaSeguro - Plataforma de consulta de licitaciones públicas
 
-Sistema de consulta de licitaciones públicas y búsqueda de proveedores del Estado de Chile, integrado con la API de Mercado Público.
+LicitaSeguro es una solución web desarrollada para el Examen Final del curso Desarrollo Frontend. El proyecto tiene como objetivo facilitar la consulta de licitaciones públicas y proveedores del Estado de Chile mediante el consumo de servicios de la API de Mercado Público.
+
+## Introducción
+
+La aplicación fue construida con React y Vite, aplicando principios de diseño UI/UX, accesibilidad web y desarrollo responsive. Permite consultar licitaciones, filtrar resultados por fecha y estado, revisar el detalle de cada proceso licitatorio y buscar proveedores mediante RUT.
+
+El desarrollo incorpora componentes reutilizables, validaciones de formularios, paginación, loaders, manejo de errores y consumo de endpoints externos. Además, considera buenas prácticas de accesibilidad.
+
+La solución busca entregar una experiencia clara, estable y adaptable para distintos tamaños de pantalla, manteniendo una estructura preparada para futuras mejoras.
 
 ## 🚀 Quick Start
 
