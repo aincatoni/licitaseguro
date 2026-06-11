@@ -107,6 +107,24 @@ return items;
 - Seguro (sin secrets expuestos)
 - Fácil de copiar/renombrar
 
+### 7. Detail Fallback Fix
+**Archivo:** `src/App.jsx`
+
+**Problema:** Si el listado visible venia desde `mock` y existia `VITE_MERCADO_PUBLICO_TICKET`, al abrir el detalle se intentaba consultar solo la API real con un codigo mock y la vista terminaba en error.
+
+**Solución:** Usar primero la licitacion ya disponible en el listado como respaldo, y solo reemplazarla por el detalle real cuando la API responde correctamente.
+
+**Impacto:** El usuario ya no pierde el flujo al entrar al detalle cuando la API no puede resolver ese codigo.
+
+### 8. Initial Listing Source Alignment
+**Archivo:** `src/App.jsx`
+
+**Problema:** El primer ingreso a `Licitaciones` podia mostrar `mock` aunque hubiera ticket configurado, generando mezcla entre listado local y detalle/API real.
+
+**Solución:** Al entrar por primera vez al modulo, y tambien al limpiar filtros, el listado intenta cargar desde Mercado Publico cuando existe ticket. Si falla, conserva datos de respaldo y muestra un aviso contextual.
+
+**Impacto:** Mayor coherencia entre listado y detalle, manteniendo una UX estable ante fallos de red o limitaciones del endpoint.
+
 ---
 
 ## Arquitectura del Proyecto
@@ -148,6 +166,11 @@ src/
 
 ### Fallback a Mock
 Si no hay token configurado o hay error de red, la app automáticamente usa datos mock. Esto permite desarrollo y demostración sin API real.
+
+### Alcance Correcto para la Evaluacion
+- La pauta del examen exige consumo real de endpoints y manejo robusto de errores, pero no exige ocultar el ticket detras de un backend.
+- Para la entrega, es valido usar `.env.local` en desarrollo o `Secrets` de CI si el build se ejecuta en GitHub Actions.
+- Como criterio profesional, esta credencial no deberia quedar expuesta en un frontend productivo; eso se resolveria con backend o funciones serverless, fuera del alcance obligatorio de la rubrica.
 
 ### Decisiones de Diseño
 
