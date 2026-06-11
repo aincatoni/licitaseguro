@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import "./App.css";
 import EmptyState from "./components/common/EmptyState";
 import LoadingState from "./components/common/LoadingState";
@@ -264,6 +264,8 @@ function App() {
   const [proveedorError, setProveedorError] = useState("");
   const [proveedorNotice, setProveedorNotice] = useState("");
   const [isProveedorLoading, setIsProveedorLoading] = useState(false);
+  const proveedorSearchRequestRef = useRef(0);
+  const proveedorLoadingRef = useRef(false);
 
   const pagination = usePagination(licitaciones, 10);
 
@@ -372,6 +374,9 @@ function App() {
   const handleProveedorSearch = async () => {
     const rut = proveedorRut;
     const normalizedRut = normalizeRutForQuery(rut);
+    const requestId = proveedorSearchRequestRef.current + 1;
+
+    proveedorSearchRequestRef.current = requestId;
 
     setCurrentView("proveedor");
     setProveedorResult(null);
@@ -381,45 +386,69 @@ function App() {
 
     if (!rut.trim()) {
       setProveedorValidationError("El RUT es obligatorio.");
-      return null;
+      return;
     }
 
     if (!isValidRut(rut)) {
       setProveedorValidationError("Ingresa un RUT valido con digito verificador correcto.");
-      return null;
+      return;
     }
 
     setProveedorValidationError("");
 
+    if (proveedorLoadingRef.current) {
+      return;
+    }
+
     if (!isMercadoPublicoConfigured()) {
       setIsProveedorLoading(true);
+      proveedorLoadingRef.current = true;
 
       await wait(MOCK_REQUEST_DELAY_MS);
 
       const provider = proveedoresMock.find((item) => item.rut === normalizedRut) ?? null;
+
+      if (proveedorSearchRequestRef.current !== requestId) {
+        return;
+      }
+
       setProveedorResult(provider);
       setProveedorFeedback(provider ? "" : "No se encontro un proveedor asociado al RUT ingresado.");
       setProveedorNotice("");
       setIsProveedorLoading(false);
-      return provider;
+      proveedorLoadingRef.current = false;
+      return;
     }
 
     setIsProveedorLoading(true);
+    proveedorLoadingRef.current = true;
 
     try {
       const provider = await fetchProveedorByRut(rut);
+
+      if (proveedorSearchRequestRef.current !== requestId) {
+        return;
+      }
+
       setProveedorResult(provider);
       setProveedorFeedback(provider ? "" : "No se encontro un proveedor asociado al RUT ingresado.");
       setProveedorNotice("");
-      return provider;
+      return;
     } catch (error) {
+      if (proveedorSearchRequestRef.current !== requestId) {
+        return;
+      }
+
       setProveedorResult(null);
       setProveedorFeedback("");
       setProveedorNotice("");
       setProveedorError(getMercadoPublicoErrorMessage(error));
-      return null;
+      return;
     } finally {
-      setIsProveedorLoading(false);
+      if (proveedorSearchRequestRef.current === requestId) {
+        setIsProveedorLoading(false);
+        proveedorLoadingRef.current = false;
+      }
     }
   };
 
