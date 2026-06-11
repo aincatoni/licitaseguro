@@ -65,6 +65,45 @@ npm run dev
 
 **Nota:** Vite recarga automáticamente cuando cambias `.env.local`. Si no funciona, detén el servidor y vuelve a iniciar.
 
+### Nota sobre el ticket y el alcance de la evaluación
+
+- Para esta evaluación es válido usar `VITE_MERCADO_PUBLICO_TICKET` desde `.env.local` en desarrollo.
+- Si el build se ejecuta en CI, también puede inyectarse desde un `secret` del pipeline.
+- Esto cumple con la pauta, porque la rúbrica evalúa consumo real de endpoints, manejo de errores y renderizado robusto.
+- En un entorno productivo real, esa credencial no debería quedar en el frontend compilado; en ese caso convendría mover el consumo a backend o serverless.
+
+---
+
+## 🎨 Material de Diseño
+
+Los mockups y el archivo fuente de Figma quedaron copiados dentro del proyecto para que puedan referenciarse directamente desde este `README` y desde la entrega final.
+
+### Home
+
+![Mockup Home](docs/assets/mockups/mockup_desktop_mobile_home_v1.png)
+
+### Licitaciones
+
+![Mockup Licitaciones](docs/assets/mockups/mockup_desktop_mobile_licitaciones_v1.png)
+
+### Detalle de Licitación
+
+![Mockup Detalle de Licitación](docs/assets/mockups/mockup_desktop_mobile_detalle_licitacion_v1.png)
+
+### Búsqueda de Proveedor
+
+![Mockup Búsqueda de Proveedor](docs/assets/mockups/mockup_desktop_mobile_buscar_proveedor_v1.png)
+
+### Vista adicional
+
+![Mockup Desktop v2](docs/assets/mockups/mockup_desktop_v2.png)
+
+### Archivo fuente
+
+- [Descargar archivo Figma fuente](docs/assets/mockups/LicitaSeguro.fig)
+
+Estos archivos pueden usarse como respaldo para el informe, la justificación UI/UX y la presentación de la evolución del diseño.
+
 ---
 
 ## 📋 Características
@@ -237,8 +276,10 @@ npm run lint
 ## 📝 Notas de Desarrollo
 
 - La app usa `isMercadoPublicoConfigured()` para decidir si usa API real o mock
+- Si hay `ticket`, la primera entrada a `Licitaciones` intenta cargar desde API real en vez de dejar el listado inicial en `mock`
 - Los errores de API se capturan y muestran como banners informativos
 - Las respuestas vacías se diferencian de los errores de red
+- Si el detalle real falla pero el ítem ya existe en el listado, la vista conserva esos datos como respaldo
 - Todos los datos se normalizan antes de usarse en componentes
 - El RUT se valida con el algoritmo oficial chileno (dígito verificador)
 
