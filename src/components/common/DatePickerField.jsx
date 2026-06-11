@@ -144,7 +144,7 @@ function DatePickerField({ label, value, onChange, placeholder = "Selecciona una
         </button>
 
         {isOpen ? (
-          <div className="date-picker__popover" role="dialog" aria-label="Seleccionar fecha">
+          <div className="date-picker__popover" role="presentation">
             <div className="date-picker__header">
               <div className="date-picker__header-main">
                 <span className="date-picker__month-label">
@@ -164,20 +164,20 @@ function DatePickerField({ label, value, onChange, placeholder = "Selecciona una
                 </button>
               </div>
 
-              {!isYearViewOpen ? (
-                <div className="date-picker__nav">
-                  <button type="button" className="date-picker__nav-button" onClick={handlePreviousMonth} disabled={!canGoPrevious}>
-                    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-                      <path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z" />
-                    </svg>
-                  </button>
-                  <button type="button" className="date-picker__nav-button" onClick={handleNextMonth} disabled={!canGoNext}>
-                    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-                      <path d="M9.3 18.7a1 1 0 0 1 0-1.4l5.3-5.3-5.3-5.3a1 1 0 0 1 1.4-1.4l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.4 0Z" />
-                    </svg>
-                  </button>
-                </div>
-              ) : null}
+                  {!isYearViewOpen ? (
+                    <div className="date-picker__nav">
+                      <button type="button" className="date-picker__nav-button" onClick={handlePreviousMonth} disabled={!canGoPrevious} aria-label="Mes anterior">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                          <path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.41 12l5.3 5.3a1 1 0 1 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z" />
+                        </svg>
+                      </button>
+                      <button type="button" className="date-picker__nav-button" onClick={handleNextMonth} disabled={!canGoNext} aria-label="Mes siguiente">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                          <path d="M9.3 18.7a1 1 0 0 1 0-1.4l5.3-5.3-5.3-5.3a1 1 0 0 1 1.4-1.4l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.4 0Z" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : null}
             </div>
 
             <div className="date-picker__body">

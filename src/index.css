@@ -54,8 +54,9 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 a:focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.28);
+  outline: 3px solid #2563eb;
   outline-offset: 2px;
+  border-radius: 2px;
 }
 
 a {

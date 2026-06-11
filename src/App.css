@@ -734,6 +734,16 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .loading-state__spinner {
+    animation: none;
+  }
+
+  .date-picker__panel-enter {
+    animation: none;
+  }
+}
+
 .filter-actions {
   margin-top: 0.35rem;
 }
@@ -967,7 +977,6 @@
     display: none;
   }
 
-  .hero-card,
   .info-card,
   .filter-panel,
   .licitacion-card,
@@ -975,6 +984,10 @@
   .empty-state,
   .cta-panel {
     padding: 1.6rem;
+  }
+
+  .hero-card {
+    padding: 2.2rem;
   }
 
   .filter-grid {

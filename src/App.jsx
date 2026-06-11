@@ -257,6 +257,10 @@ function App() {
   const [detailNotice, setDetailNotice] = useState("");
   const [isLicitacionesLoading, setIsLicitacionesLoading] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const licitacionesSearchRequestRef = useRef(0);
+  const licitacionesLoadingRef = useRef(false);
+  const licitacionesAbortRef = useRef(null);
+  const hasLoadedInitialLicitacionesRef = useRef(false);
   const [proveedorResult, setProveedorResult] = useState(null);
   const [proveedorRut, setProveedorRut] = useState("");
   const [proveedorValidationError, setProveedorValidationError] = useState("");
@@ -266,14 +270,31 @@ function App() {
   const [isProveedorLoading, setIsProveedorLoading] = useState(false);
   const proveedorSearchRequestRef = useRef(0);
   const proveedorLoadingRef = useRef(false);
+  const proveedorAbortRef = useRef(null);
 
   const pagination = usePagination(licitaciones, 10);
 
   const handleNavigate = (view) => {
     setCurrentView(view);
+
+    if (view === "licitaciones" && isMercadoPublicoConfigured() && !hasLoadedInitialLicitacionesRef.current) {
+      hasLoadedInitialLicitacionesRef.current = true;
+      void handleLicitacionesSearch(INITIAL_FILTERS, { preserveFallbackOnError: true });
+    }
   };
 
-  const handleLicitacionesSearch = async ({ fecha, estado }) => {
+  const handleLicitacionesSearch = async ({ fecha, estado }, options = {}) => {
+    const { preserveFallbackOnError = false } = options;
+
+    if (licitacionesLoadingRef.current) {
+      return;
+    }
+
+    const requestId = licitacionesSearchRequestRef.current + 1;
+
+    licitacionesSearchRequestRef.current = requestId;
+    licitacionesLoadingRef.current = true;
+
     setAppliedFilters({ fecha, estado });
     setCurrentView("licitaciones");
     setLicitacionesError("");
@@ -281,44 +302,88 @@ function App() {
     setSelectedLicitacion(null);
     pagination.goToPage(1);
 
+    setIsLicitacionesLoading(true);
+
     if (!isMercadoPublicoConfigured()) {
-      setIsLicitacionesLoading(true);
+      try {
+        await wait(MOCK_REQUEST_DELAY_MS);
 
-      await wait(MOCK_REQUEST_DELAY_MS);
+        const maxFechaCierre = getMaxFechaCierre(licitacionesMock);
 
-      const maxFechaCierre = getMaxFechaCierre(licitacionesMock);
+        const filteredItems = licitacionesMock.filter((item) => {
+          const matchesFecha = !fecha || item.fechaCierre === fecha;
+          const matchesEstado = !estado || item.estado === estado;
+          return matchesFecha && matchesEstado;
+        });
 
-      const filteredItems = licitacionesMock.filter((item) => {
-        const matchesFecha = !fecha || item.fechaCierre === fecha;
-        const matchesEstado = !estado || item.estado === estado;
-        return matchesFecha && matchesEstado;
-      });
+        if (licitacionesSearchRequestRef.current !== requestId) {
+          return;
+        }
 
-      setLicitaciones(filteredItems);
-      setLicitacionesEmptyMessage(getLicitacionesEmptyMessage(fecha, maxFechaCierre));
-      setLicitacionesNotice("");
-      setIsLicitacionesLoading(false);
+        setLicitaciones(filteredItems);
+        setLicitacionesEmptyMessage(getLicitacionesEmptyMessage(fecha, maxFechaCierre));
+        setLicitacionesNotice("");
+      } finally {
+        if (licitacionesSearchRequestRef.current === requestId) {
+          setIsLicitacionesLoading(false);
+          licitacionesLoadingRef.current = false;
+        }
+      }
+
       return;
     }
 
-    setIsLicitacionesLoading(true);
+    if (licitacionesAbortRef.current) {
+      licitacionesAbortRef.current.abort();
+    }
+
+    const abortController = new AbortController();
+    licitacionesAbortRef.current = abortController;
 
     try {
-      const results = await fetchLicitaciones({ fecha, estado });
+      const results = await fetchLicitaciones({ fecha, estado }, { signal: abortController.signal });
+
+      if (licitacionesSearchRequestRef.current !== requestId) {
+        return;
+      }
+
       setLicitaciones(results.items);
       setLicitacionesEmptyMessage(getLicitacionesEmptyMessage(fecha, results.maxFechaCierre));
       setLicitacionesNotice("");
     } catch (error) {
-      setLicitaciones([]);
+      if (error.name === "AbortError") {
+        return;
+      }
+
+      if (licitacionesSearchRequestRef.current !== requestId) {
+        return;
+      }
+
+      if (preserveFallbackOnError) {
+        setLicitaciones((currentItems) => (currentItems.length > 0 ? currentItems : licitacionesMock));
+        setLicitacionesNotice("No fue posible actualizar las licitaciones desde Mercado Publico. Se muestran datos de respaldo.");
+        setLicitacionesError("");
+      } else {
+        setLicitaciones([]);
+        setLicitacionesNotice("");
+        setLicitacionesError(getMercadoPublicoErrorMessage(error));
+      }
+
       setLicitacionesEmptyMessage("Prueba otro estado o una fecha distinta para obtener resultados.");
-      setLicitacionesNotice("");
-      setLicitacionesError(getMercadoPublicoErrorMessage(error));
     } finally {
-      setIsLicitacionesLoading(false);
+      if (licitacionesSearchRequestRef.current === requestId) {
+        setIsLicitacionesLoading(false);
+        licitacionesLoadingRef.current = false;
+      }
     }
   };
 
   const handleLicitacionesClear = () => {
+    if (isMercadoPublicoConfigured()) {
+      void handleLicitacionesSearch(INITIAL_FILTERS, { preserveFallbackOnError: true });
+      return;
+    }
+
     setAppliedFilters(INITIAL_FILTERS);
     setLicitaciones(licitacionesMock);
     pagination.goToPage(1);
@@ -331,22 +396,24 @@ function App() {
   };
 
   const handleViewDetail = async (codigo) => {
+    const fallbackLicitacion =
+      licitaciones.find((item) => item.codigo === codigo) ?? licitacionesMock.find((item) => item.codigo === codigo) ?? null;
+
     setCurrentView("detalle");
     setDetailError("");
+    setDetailNotice("");
 
     if (!isMercadoPublicoConfigured()) {
       setIsDetailLoading(true);
 
       await wait(MOCK_REQUEST_DELAY_MS);
 
-      setSelectedLicitacion(licitacionesMock.find((item) => item.codigo === codigo) ?? null);
-      setDetailNotice("");
+      setSelectedLicitacion(fallbackLicitacion);
       setIsDetailLoading(false);
       return;
     }
 
-    setSelectedLicitacion(null);
-    setDetailNotice("");
+    setSelectedLicitacion(fallbackLicitacion);
     setIsDetailLoading(true);
 
     try {
@@ -354,7 +421,11 @@ function App() {
       setSelectedLicitacion(detail);
       setDetailNotice("");
     } catch (error) {
-      setDetailError(getMercadoPublicoErrorMessage(error));
+      if (fallbackLicitacion) {
+        setDetailNotice("No fue posible actualizar el detalle desde Mercado Publico. Se muestran los datos disponibles del listado.");
+      } else {
+        setDetailError(getMercadoPublicoErrorMessage(error));
+      }
     } finally {
       setIsDetailLoading(false);
     }
@@ -374,22 +445,23 @@ function App() {
   const handleProveedorSearch = async () => {
     const rut = proveedorRut;
     const normalizedRut = normalizeRutForQuery(rut);
-    const requestId = proveedorSearchRequestRef.current + 1;
-
-    proveedorSearchRequestRef.current = requestId;
-
-    setCurrentView("proveedor");
-    setProveedorResult(null);
-    setProveedorFeedback("");
-    setProveedorError("");
-    setProveedorNotice("");
 
     if (!rut.trim()) {
+      setCurrentView("proveedor");
+      setProveedorResult(null);
+      setProveedorFeedback("");
+      setProveedorError("");
+      setProveedorNotice("");
       setProveedorValidationError("El RUT es obligatorio.");
       return;
     }
 
     if (!isValidRut(rut)) {
+      setCurrentView("proveedor");
+      setProveedorResult(null);
+      setProveedorFeedback("");
+      setProveedorError("");
+      setProveedorNotice("");
       setProveedorValidationError("Ingresa un RUT valido con digito verificador correcto.");
       return;
     }
@@ -400,31 +472,49 @@ function App() {
       return;
     }
 
+    const requestId = proveedorSearchRequestRef.current + 1;
+
+    proveedorSearchRequestRef.current = requestId;
+    proveedorLoadingRef.current = true;
+
+    setCurrentView("proveedor");
+    setProveedorResult(null);
+    setProveedorFeedback("");
+    setProveedorError("");
+    setProveedorNotice("");
+    setIsProveedorLoading(true);
+
     if (!isMercadoPublicoConfigured()) {
-      setIsProveedorLoading(true);
-      proveedorLoadingRef.current = true;
+      try {
+        await wait(MOCK_REQUEST_DELAY_MS);
 
-      await wait(MOCK_REQUEST_DELAY_MS);
+        const provider = proveedoresMock.find((item) => item.rut === normalizedRut) ?? null;
 
-      const provider = proveedoresMock.find((item) => item.rut === normalizedRut) ?? null;
+        if (proveedorSearchRequestRef.current !== requestId) {
+          return;
+        }
 
-      if (proveedorSearchRequestRef.current !== requestId) {
-        return;
+        setProveedorResult(provider);
+        setProveedorFeedback(provider ? "" : "No se encontro un proveedor asociado al RUT ingresado.");
+        setProveedorNotice("");
+      } finally {
+        if (proveedorSearchRequestRef.current === requestId) {
+          setIsProveedorLoading(false);
+          proveedorLoadingRef.current = false;
+        }
       }
 
-      setProveedorResult(provider);
-      setProveedorFeedback(provider ? "" : "No se encontro un proveedor asociado al RUT ingresado.");
-      setProveedorNotice("");
-      setIsProveedorLoading(false);
-      proveedorLoadingRef.current = false;
       return;
     }
 
-    setIsProveedorLoading(true);
-    proveedorLoadingRef.current = true;
+    if (proveedorAbortRef.current) {
+      proveedorAbortRef.current.abort();
+    }
+    const abortController = new AbortController();
+    proveedorAbortRef.current = abortController;
 
     try {
-      const provider = await fetchProveedorByRut(rut);
+      const provider = await fetchProveedorByRut(rut, { signal: abortController.signal });
 
       if (proveedorSearchRequestRef.current !== requestId) {
         return;
@@ -435,6 +525,10 @@ function App() {
       setProveedorNotice("");
       return;
     } catch (error) {
+      if (error.name === "AbortError") {
+        return;
+      }
+
       if (proveedorSearchRequestRef.current !== requestId) {
         return;
       }

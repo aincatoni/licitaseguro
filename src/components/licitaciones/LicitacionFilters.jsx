@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DatePickerField from "../common/DatePickerField";
 import SelectField from "../common/SelectField";
 
@@ -10,9 +10,22 @@ const ESTADO_OPTIONS = [
   { value: "desierta", label: "Desierta" },
 ];
 
+const SUBMIT_COOLDOWN_MS = 600;
+
 function LicitacionFilters({ initialValues, onSearch, onClear, isLoading = false }) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
+  const [isCoolingDown, setIsCoolingDown] = useState(false);
+  const submitLockRef = useRef(false);
+  const cooldownTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownTimeoutRef.current) {
+        window.clearTimeout(cooldownTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleEstadoChange = (value) => {
     setValues((currentValues) => ({ ...currentValues, estado: value }));
@@ -27,9 +40,30 @@ function LicitacionFilters({ initialValues, onSearch, onClear, isLoading = false
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (submitLockRef.current || isCoolingDown) {
+      return;
+    }
+
     setErrors({});
 
-    await onSearch(values);
+    submitLockRef.current = true;
+    setIsCoolingDown(true);
+
+    try {
+      await onSearch(values);
+    } finally {
+      cooldownTimeoutRef.current = window.setTimeout(() => {
+        submitLockRef.current = false;
+        setIsCoolingDown(false);
+      }, SUBMIT_COOLDOWN_MS);
+    }
+  };
+
+  const handleSubmitButtonPointerDown = (event) => {
+    if (submitLockRef.current || isLoading || isCoolingDown) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
   };
 
   const handleClear = () => {
@@ -61,8 +95,13 @@ function LicitacionFilters({ initialValues, onSearch, onClear, isLoading = false
       ) : null}
 
       <div className="filter-actions">
-        <button className="button button-primary" type="submit" disabled={isLoading}>
-          {isLoading ? "Buscando..." : "Buscar"}
+        <button
+          className="button button-primary"
+          type="submit"
+          disabled={isLoading || isCoolingDown}
+          onPointerDown={handleSubmitButtonPointerDown}
+        >
+          {isLoading ? "Buscando..." : isCoolingDown ? "Espera..." : "Buscar"}
         </button>
         <button className="button button-secondary" type="button" onClick={handleClear} disabled={isLoading}>
           Limpiar

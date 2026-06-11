@@ -59,7 +59,7 @@ function SelectField({ label, value, onChange, options, placeholder = "Seleccion
         </button>
 
         {isOpen ? (
-          <div className="date-picker__popover select-field__popover" role="dialog" aria-label={`Seleccionar ${label.toLowerCase()}`}>
+          <div className="date-picker__popover select-field__popover" role="presentation">
             <div className="select-field__options" role="listbox" aria-labelledby={inputId}>
               {options.map((option) => {
                 const isSelected = option.value === value;

@@ -1,3 +1,7 @@
+import { useEffect, useRef, useState } from "react";
+
+const SUBMIT_COOLDOWN_MS = 600;
+
 function ProveedorSearchForm({
   rut,
   onRutChange,
@@ -6,6 +10,17 @@ function ProveedorSearchForm({
   feedback = "",
   isLoading = false,
 }) {
+  const [isCoolingDown, setIsCoolingDown] = useState(false);
+  const submitLockRef = useRef(false);
+  const cooldownTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownTimeoutRef.current) {
+        window.clearTimeout(cooldownTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = (event) => {
     onRutChange(event.target.value);
@@ -14,7 +29,28 @@ function ProveedorSearchForm({
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    await onSearch();
+    if (submitLockRef.current || isCoolingDown) {
+      return;
+    }
+
+    submitLockRef.current = true;
+    setIsCoolingDown(true);
+
+    try {
+      await onSearch();
+    } finally {
+      cooldownTimeoutRef.current = window.setTimeout(() => {
+        submitLockRef.current = false;
+        setIsCoolingDown(false);
+      }, SUBMIT_COOLDOWN_MS);
+    }
+  };
+
+  const handleSubmitButtonPointerDown = (event) => {
+    if (submitLockRef.current || isLoading || isCoolingDown) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
   };
 
   return (
@@ -31,7 +67,7 @@ function ProveedorSearchForm({
           onChange={handleChange}
           disabled={isLoading}
           aria-describedby={error ? "rut-error" : feedback ? "rut-feedback" : undefined}
-          aria-invalid={error ? "true" : "false"}
+          aria-invalid={error ? "true" : undefined}
         />
       </div>
 
@@ -48,8 +84,13 @@ function ProveedorSearchForm({
       ) : null}
 
       <div className="filter-actions">
-        <button className="button button-primary" type="submit" disabled={isLoading}>
-          {isLoading ? "Buscando..." : "Buscar proveedor"}
+        <button
+          className="button button-primary"
+          type="submit"
+          disabled={isLoading || isCoolingDown}
+          onPointerDown={handleSubmitButtonPointerDown}
+        >
+          {isLoading ? "Buscando..." : isCoolingDown ? "Espera..." : "Buscar proveedor"}
         </button>
       </div>
     </form>

@@ -12,6 +12,9 @@ const ERROR_MESSAGES = {
   response: "Mercado Publico respondio con un formato inesperado.",
 };
 
+const REQUEST_COOLDOWN_MS = 2500;
+let nextAvailableRequestAt = 0;
+
 class MercadoPublicoError extends Error {
   constructor(code, message) {
     super(message);
@@ -40,16 +43,47 @@ function getRequiredTicket() {
   return MERCADO_PUBLICO_TICKET;
 }
 
+function wait(milliseconds) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, milliseconds);
+  });
+}
+
+async function waitForRequestWindow(signal) {
+  const remainingDelay = nextAvailableRequestAt - Date.now();
+
+  if (remainingDelay <= 0) {
+    return;
+  }
+
+  if (signal?.aborted) {
+    throw new DOMException("The operation was aborted.", "AbortError");
+  }
+
+  await wait(remainingDelay);
+
+  if (signal?.aborted) {
+    throw new DOMException("The operation was aborted.", "AbortError");
+  }
+}
+
 async function requestJson(pathname, params, options = {}) {
   const ticket = getRequiredTicket();
   const url = createUrl(pathname, { ...params, ticket });
   const allowedErrorCodes = options.allowedErrorCodes ?? [];
+  const signal = options.signal;
+
+  await waitForRequestWindow(signal);
+  nextAvailableRequestAt = Date.now() + REQUEST_COOLDOWN_MS;
 
   let response;
 
   try {
-    response = await fetch(url);
-  } catch {
+    response = await fetch(url, { signal });
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw error;
+    }
     throw new MercadoPublicoError("network", ERROR_MESSAGES.network);
   }
 
@@ -166,12 +200,16 @@ export function getMercadoPublicoErrorMessage(error) {
   return ERROR_MESSAGES.network;
 }
 
-export async function fetchLicitaciones(filters) {
-  const payload = await requestJson("/publico/licitaciones.json", {
-    // La API rechaza fechas futuras, por eso siempre consultamos con la fecha actual
-    // y aplicamos los filtros visibles de la UI sobre la fecha de cierre retornada.
-    fecha: getCurrentApiDateValue(),
-  });
+export async function fetchLicitaciones(filters, { signal } = {}) {
+  const payload = await requestJson(
+    "/publico/licitaciones.json",
+    {
+      // La API rechaza fechas futuras, por eso siempre consultamos con la fecha actual
+      // y aplicamos los filtros visibles de la UI sobre la fecha de cierre retornada.
+      fecha: getCurrentApiDateValue(),
+    },
+    { signal },
+  );
 
   if (!Array.isArray(payload?.Listado)) {
     throw new MercadoPublicoError("response", ERROR_MESSAGES.response);
@@ -205,7 +243,7 @@ export async function fetchLicitacionDetail(codigo) {
   return normalizeLicitacionListItem(item);
 }
 
-export async function fetchProveedorByRut(rut) {
+export async function fetchProveedorByRut(rut, { signal } = {}) {
   const payload = await requestJson(
     "/Publico/Empresas/BuscarProveedor",
     {
@@ -213,6 +251,7 @@ export async function fetchProveedorByRut(rut) {
     },
     {
       allowedErrorCodes: [10200],
+      signal,
     },
   );
 
