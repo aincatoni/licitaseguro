@@ -1,16 +1,17 @@
 import { useState } from "react";
+import { Link, NavLink } from "react-router-dom";
+import { HOME_PATH, LICITACIONES_PATH, PROVEEDORES_PATH } from "../../routes/paths";
 
 const NAV_ITEMS = [
-  { id: "home", label: "Inicio" },
-  { id: "licitaciones", label: "Licitaciones" },
-  { id: "proveedor", label: "Buscar proveedor" },
+  { to: HOME_PATH, label: "Inicio", end: true },
+  { to: LICITACIONES_PATH, label: "Licitaciones" },
+  { to: PROVEEDORES_PATH, label: "Buscar proveedor" },
 ];
 
-function Header({ currentView, onNavigate }) {
+function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleNavigate = (view) => {
-    onNavigate(view);
+  const handleNavigate = () => {
     setIsMobileMenuOpen(false);
   };
 
@@ -18,7 +19,7 @@ function Header({ currentView, onNavigate }) {
     <header className="site-header">
       <div className="site-header__inner">
         <div className="site-header__row">
-          <button className="brand-button" onClick={() => handleNavigate("home")}>
+          <Link className="brand-button" to={HOME_PATH} onClick={handleNavigate}>
             <span className="brand-mark" aria-hidden="true">
               LS
             </span>
@@ -26,7 +27,7 @@ function Header({ currentView, onNavigate }) {
               <strong>LicitaSeguro</strong>
               <small>Consulta ciudadana y empresarial</small>
             </span>
-          </button>
+          </Link>
 
           <button
             type="button"
@@ -47,19 +48,17 @@ function Header({ currentView, onNavigate }) {
           aria-label="Navegacion principal"
           className={isMobileMenuOpen ? "main-nav main-nav-open" : "main-nav"}
         >
-          {NAV_ITEMS.map((item) => {
-            const isActive = item.id === currentView;
-            return (
-              <button
-                key={item.id}
-                className={isActive ? "nav-link nav-link-active" : "nav-link"}
-                aria-current={isActive ? "page" : undefined}
-                onClick={() => handleNavigate(item.id)}
-              >
-                {item.label}
-              </button>
-            );
-          })}
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) => (isActive ? "nav-link nav-link-active" : "nav-link")}
+              onClick={handleNavigate}
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
       </div>
     </header>

@@ -1,7 +1,9 @@
+import { Link } from "react-router-dom";
 import StatusBadge from "../common/StatusBadge";
 import { formatDateForDisplay } from "../../utils/date";
+import { getLicitacionDetailPath } from "../../routes/paths";
 
-function LicitacionCard({ item, onViewDetail }) {
+function LicitacionCard({ item }) {
   return (
     <article className="licitacion-card">
       <div className="licitacion-card__top">
@@ -27,9 +29,9 @@ function LicitacionCard({ item, onViewDetail }) {
         </div>
       </dl>
 
-      <button className="button button-secondary" onClick={() => onViewDetail(item.codigo)}>
+      <Link className="button button-secondary" to={getLicitacionDetailPath(item.codigo)}>
         Ver detalle
-      </button>
+      </Link>
     </article>
   );
 }

@@ -2,7 +2,7 @@ import EmptyState from "../common/EmptyState";
 import Pagination from "../common/Pagination";
 import LicitacionCard from "./LicitacionCard";
 
-function LicitacionList({ items, onViewDetail, pagination, emptyMessage }) {
+function LicitacionList({ items, pagination, emptyMessage }) {
   if (!items.length) {
     return (
       <EmptyState
@@ -20,7 +20,7 @@ function LicitacionList({ items, onViewDetail, pagination, emptyMessage }) {
 
       <div className="results-grid">
         {pagination.paginatedItems.map((item) => (
-          <LicitacionCard key={item.codigo} item={item} onViewDetail={onViewDetail} />
+          <LicitacionCard key={item.codigo} item={item} />
         ))}
       </div>
 

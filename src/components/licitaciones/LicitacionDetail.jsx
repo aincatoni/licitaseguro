@@ -1,5 +1,7 @@
+import { Link } from "react-router-dom";
 import StatusBadge from "../common/StatusBadge";
 import { formatDateForDisplay } from "../../utils/date";
+import { LICITACIONES_PATH } from "../../routes/paths";
 import { fallbackText } from "../../utils/text";
 
 function DetailRow({ label, value }) {
@@ -11,13 +13,13 @@ function DetailRow({ label, value }) {
   );
 }
 
-function LicitacionDetail({ licitacion, onBack }) {
+function LicitacionDetail({ licitacion }) {
   return (
     <article className="detail-panel">
-      <button className="detail-back-link" onClick={onBack}>
+      <Link className="detail-back-link" to={LICITACIONES_PATH}>
         <span aria-hidden="true">←</span>
         <span>Volver al listado</span>
-      </button>
+      </Link>
 
       <header className="detail-header">
         <div>
