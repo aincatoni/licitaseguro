@@ -248,7 +248,7 @@ npm run lint
 4. Verás resultados mock
 5. Haz clic en "Ver detalle"
 6. Regresa y prueba "Buscar proveedor"
-7. Busca un RUT válido (ej: `76.345.619-k`)
+7. Busca un RUT válido (ej: `76.123.456-7`)
 
 ### Con API Real (con token válido)
 
