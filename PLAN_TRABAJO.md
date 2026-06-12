@@ -60,7 +60,7 @@ Desarrollar el sitio web de `LicitaSeguro` en React + Vite para cumplir la pauta
 1. Adaptar el mockup al proyecto React. `Avanzado`
 2. Definir tipografias, colores y espaciados. `Avanzado`
 3. Construir `Header` y `Footer` reutilizables. `Completado`
-4. Dejar documentadas decisiones UI/UX para el informe. `Pendiente`
+4. Dejar documentadas decisiones UI/UX para el informe. `Completado`
 5. Verificar consistencia visual con la identidad propuesta. `Completado`
 
 ## Fase 5: Homepage corporativo
@@ -125,30 +125,29 @@ Desarrollar el sitio web de `LicitaSeguro` en React + Vite para cumplir la pauta
 2. Verificar comportamiento en tablet. `Completado`
 3. Verificar comportamiento en laptop/desktop. `Completado`
 4. Ajustar layout, espaciados y jerarquia visual por breakpoint. `Completado`
-5. Documentar decisiones responsive en comentarios y en el informe. `Pendiente`
+5. Documentar decisiones responsive en comentarios y en el informe. `Completado`
 
 ## Fase 11: QA contra rubrica
 
-1. Revisar cumplimiento de UI/UX. `En curso`
+1. Revisar cumplimiento de UI/UX. `Completado`
 2. Revisar cumplimiento responsive. `Completado`
-3. Revisar validaciones y eventos. `En curso`
+3. Revisar validaciones y eventos. `Completado`
 4. Revisar accesibilidad. `Completado`
 5. Revisar consumo de endpoints y errores controlados. `Completado`
 6. Revisar orden y claridad del codigo fuente. `Completado`
 
 ## Fase 12: Entregables finales
 
-1. Preparar informe del examen.
-2. Incluir mockups y justificacion UI/UX.
-3. Documentar estructura del proyecto y pasos de ejecucion.
+1. Dejar la documentacion final centralizada en `README.md`. `Completado`
+2. Incluir mockups y justificacion UI/UX. `Completado`
+3. Documentar estructura del proyecto y pasos de ejecucion. `Completado`
 4. Video explicativo no requerido por indicacion del profesor.
 5. Comprimir entrega en formato solicitado por la pauta.
 
 ## Proxima sesion sugerida
 
-1. Hacer QA final con datos reales sobre validaciones, mensajes de error y tiempos de respuesta.
-2. Revisar si el detalle real de Mercado Publico expone todos los campos que hoy consume la vista o si conviene ajustar el normalizador.
-3. Preparar informe y empaquetado final.
+1. Generar el ZIP final en el formato solicitado por la pauta.
+2. Revisar una ultima vez la aplicacion en navegador antes de entregar.
 
 ## Checklist rapido
 
@@ -165,6 +164,6 @@ Desarrollar el sitio web de `LicitaSeguro` en React + Vite para cumplir la pauta
 - [x] Control de clicks repetidos en busquedas de licitaciones y proveedor
 - [x] Accesibilidad revisada
 - [x] Responsive revisado
-- [ ] Informe preparado
+- [x] Documentacion final en README
 - [x] Video no requerido por profesor
 - [ ] ZIP final listo para entrega

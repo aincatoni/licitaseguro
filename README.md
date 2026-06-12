@@ -73,15 +73,6 @@ npm run dev
 
 **Nota:** Vite recarga automáticamente cuando cambias `.env.local`. Si no funciona, detén el servidor y vuelve a iniciar.
 
-### Nota sobre el ticket y el alcance de la evaluación
-
-- Para esta evaluación es válido usar `VITE_MERCADO_PUBLICO_TICKET` desde `.env.local` en desarrollo.
-- Si el build se ejecuta en CI, también puede inyectarse desde un `secret` del pipeline.
-- Esto cumple con la pauta, porque la rúbrica evalúa consumo real de endpoints, manejo de errores y renderizado robusto.
-- En un entorno productivo real, esa credencial no debería quedar en el frontend compilado; en ese caso convendría mover el consumo a backend o serverless.
-
----
-
 ## 🎨 Material de Diseño
 
 Los mockups y el archivo fuente de Figma quedaron copiados dentro del proyecto para que puedan referenciarse directamente desde este `README` y desde la entrega final.
@@ -110,7 +101,7 @@ Los mockups y el archivo fuente de Figma quedaron copiados dentro del proyecto p
 
 - [Descargar archivo Figma fuente](docs/assets/mockups/LicitaSeguro.fig)
 
-Estos archivos pueden usarse como respaldo para el informe, la justificación UI/UX y la presentación de la evolución del diseño.
+Estos archivos sirven como respaldo visual del proceso de diseño y de la evolucion de la interfaz.
 
 ---
 
@@ -145,45 +136,58 @@ Estos archivos pueden usarse como respaldo para el informe, la justificación UI
 
 ---
 
+## 🎯 Decisiones de Diseño
+
+- Se priorizó una navegación simple desde el home hacia los dos módulos principales.
+- Los filtros se ubican antes de los resultados para hacer más claro el flujo de búsqueda.
+- El listado de licitaciones muestra primero la información más útil para escaneo rápido: código, nombre, organismo, estado y fechas.
+- La interfaz usa una línea visual sobria y corporativa, con alto contraste y componentes consistentes entre vistas.
+- El diseño responsive se resolvió con enfoque mobile-first para mantener legibilidad y jerarquía en teléfono, tablet y desktop.
+
+---
+
+## ⚙️ Decisiones Técnicas
+
+- La aplicación fue desarrollada con React 19 y Vite.
+- El consumo de la API se centraliza en `src/services/mercadoPublicoApi.js`.
+- Las respuestas se normalizan antes de llegar a la UI para evitar dependencias directas con el formato del endpoint.
+- Se mantiene fallback a datos mock cuando no hay configuración de API o cuando una consulta remota falla.
+- La validación del RUT se implementa con el algoritmo de dígito verificador chileno.
+- Se incorporó control de consultas consecutivas para hacer más estable la experiencia con Mercado Público.
+
+---
+
 ## 🛠️ Estructura del Proyecto
 
 ```
 src/
 ├── components/
-│   ├── common/           # Componentes reutilizables
-│   │   ├── DatePickerField.jsx
-│   │   ├── SelectField.jsx
-│   │   ├── LoadingState.jsx
-│   │   ├── EmptyState.jsx
-│   │   ├── NoticeBanner.jsx
-│   │   ├── Pagination.jsx
-│   │   └── StatusBadge.jsx
-│   ├── layout/           # Layout principal
-│   │   ├── Header.jsx
-│   │   ├── Footer.jsx
-│   │   └── PageContainer.jsx
-│   ├── licitaciones/     # Módulo de licitaciones
-│   │   ├── LicitacionFilters.jsx
-│   │   ├── LicitacionList.jsx
-│   │   ├── LicitacionCard.jsx
-│   │   └── LicitacionDetail.jsx
-│   └── proveedores/      # Módulo de proveedores
-│       ├── ProveedorSearchForm.jsx
-│       └── ProveedorResultCard.jsx
-├── services/
-│   └── mercadoPublicoApi.js    # Integración con API
-├── utils/
-│   ├── date.js           # Utilidades de fecha
-│   ├── rut.js            # Validación y formato de RUT
-│   ├── text.js           # Sanitización de texto
-│   └── licitaciones.js   # Mapeo de estados
+│   ├── common/                # Componentes reutilizables
+│   ├── layout/                # Header, Footer, contenedores
+│   ├── licitaciones/          # Componentes del módulo de licitaciones
+│   └── proveedores/           # Componentes del módulo de proveedores
+├── views/
+│   ├── home/                  # Vista principal
+│   ├── licitaciones/          # Listado y detalle
+│   └── proveedores/           # Búsqueda de proveedor
 ├── hooks/
-│   └── usePagination.js  # Lógica de paginación
+│   ├── common/                # Hooks reutilizables
+│   ├── licitaciones/          # Lógica del módulo de licitaciones
+│   └── proveedores/           # Lógica del módulo de proveedores
+├── routes/
+│   └── paths.js               # Rutas de la aplicación
+├── services/
+│   └── mercadoPublicoApi.js   # Integración con API
+├── utils/
+│   ├── date.js                # Utilidades de fecha
+│   ├── rut.js                 # Validación y formato de RUT
+│   ├── text.js                # Sanitización de texto
+│   └── licitaciones.js        # Mapeo y normalización de licitaciones
 ├── data/
-│   └── mockData.js       # Datos de prueba
-├── App.jsx               # Componente principal
-├── App.css               # Estilos globales
-└── main.jsx              # Punto de entrada
+│   └── mockData.js            # Datos de prueba
+├── App.jsx                    # Componente principal
+├── App.css                    # Estilos globales
+└── main.jsx                   # Punto de entrada
 ```
 
 ---
@@ -283,13 +287,9 @@ npm run lint
 
 ## 📝 Notas de Desarrollo
 
-- La app usa `isMercadoPublicoConfigured()` para decidir si usa API real o mock
-- Si hay `ticket`, la primera entrada a `Licitaciones` intenta cargar desde API real en vez de dejar el listado inicial en `mock`
-- Los errores de API se capturan y muestran como banners informativos
-- Las respuestas vacías se diferencian de los errores de red
-- Si el detalle real falla pero el ítem ya existe en el listado, la vista conserva esos datos como respaldo
-- Todos los datos se normalizan antes de usarse en componentes
-- El RUT se valida con el algoritmo oficial chileno (dígito verificador)
+- Si hay configuracion de API, el modulo de licitaciones intenta cargar datos reales desde el primer ingreso.
+- Los errores de API y los estados vacios se manejan de forma diferenciada para no confundir fallos de red con ausencia de resultados.
+- Si el detalle remoto falla, la vista puede conservar la informacion ya obtenida desde el listado para no cortar el flujo del usuario.
 
 ---
 
